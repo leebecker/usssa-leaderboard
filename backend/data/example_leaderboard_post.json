@@ -1,0 +1,51 @@
+{
+  "name": "string",
+  "description": "string",
+  "award_category": [
+    {
+      "name": "Gold",
+      "value": 100
+    },
+    {
+      "name": "Silver",
+      "value": 70
+    },
+    {
+      "name": "Bronze",
+      "value": 40
+    }
+  ],
+  "contingents": [
+    {
+      "contingent_name": "USA"
+    }
+  ],
+  "categories": [
+    {
+      "name": "Tanding",
+      "fields": [
+        {
+          "name": "class",
+          "options": ["Light", "Medium", "Heavy"]
+        },
+        {
+          "name": "gender",
+          "options": ["Male", "Female"]
+        }
+      ]
+    },
+    {
+      "name": "Seni",
+      "fields": [
+        {
+          "name": "class",
+          "options": ["Open Creative", "Tunggal", "Ganda"]
+        },
+        {
+          "name": "gender",
+          "options": ["Male", "Female"]
+        }
+      ]
+    }
+  ]
+}
