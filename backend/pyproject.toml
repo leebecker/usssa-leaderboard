@@ -1,0 +1,27 @@
+[build-system]
+requires = ["poetry>=1.1.0"]
+build-backend = "poetry.masonry.api"
+
+[tool.poetry]
+name = "usssa_leaderboard"
+version = "0.0.1"
+description = "USSSA Leaderboard backend API"
+authors = ["Lee Becker <lee.becker@usasportsilat.org>"]
+
+[tool.poetry.dependencies]
+python = "^3.8,<4.0"
+fastapi = "^0.100.0"
+uvicorn = "^0.23.0"
+
+[tool.poetry.dev-dependencies]
+
+
+[tool.poetry.extras]
+
+#[tool.poetry.source]
+#include = ["src"]
+
+[tool.poetry.scripts]
+test = "pytest"
+start = "uvicorn usssa_leaderboard.main:app --reload"
+quick = "python -m usssa_leaderboard.main"
