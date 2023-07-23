@@ -1,25 +1,11 @@
 {
-  "name": "string",
-  "description": "string",
-  "award_category": [
-    {
-      "name": "Gold",
-      "value": 100
-    },
-    {
-      "name": "Silver",
-      "value": 70
-    },
-    {
-      "name": "Bronze",
-      "value": 40
-    }
-  ],
-  "contingents": [
-    {
-      "contingent_name": "USA"
-    }
-  ],
+  "name": "T5 Championship 2023",
+  "description": "T5 Liberty Cup Championship",
+  "award_values": {
+      "gold": 100,
+      "silver": 70,
+      "bronze": 40
+  },
   "categories": [
     {
       "name": "Tanding",
@@ -46,6 +32,46 @@
           "options": ["Male", "Female"]
         }
       ]
+    },
+    {
+      "name": "Championship Tunggal",
+      "fields": [
+        {
+          "name": "class",
+          "options": ["Light", "Medium", "Heavy"]
+        },
+        {
+          "name": "gender",
+          "options": ["Male", "Female"]
+        }
+      ]
+    },
+    {
+      "name": "Championship Seni",
+      "fields": [
+        {
+          "name": "class",
+          "options": ["Open Creative", "Tunggal", "Ganda"]
+        },
+        {
+          "name": "gender",
+          "options": ["Male", "Female"]
+        }
+      ]
+    }
+  ],
+  "contingents": [
+    {
+      "name": "United States Sport Silat Association (USSSA)",
+      "country": "US"
+    },
+    {
+      "name": "Ikatan Pencak Silat Indonesia (IPSI)",
+      "country": "ID"
+    },
+    {
+      "name": "Sinagpore Silat Federation (PERSISI)",
+      "country": "SG"
     }
   ]
 }

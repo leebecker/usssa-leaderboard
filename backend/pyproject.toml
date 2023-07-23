@@ -12,6 +12,11 @@ authors = ["Lee Becker <lee.becker@usasportsilat.org>"]
 python = "^3.8,<4.0"
 fastapi = "^0.100.0"
 uvicorn = "^0.23.0"
+pydantic= "^1.2.0,<2.0.0"
+pymongo = "^4.4.1"
+motor = "^3.2.0"
+python-slugify = "^8.0.1"
+nanoid = "^2.0.0"
 
 [tool.poetry.dev-dependencies]
 
@@ -22,6 +27,6 @@ uvicorn = "^0.23.0"
 #include = ["src"]
 
 [tool.poetry.scripts]
-test = "pytest"
+#test = "pytest"
 start = "uvicorn usssa_leaderboard.main:app --reload"
-quick = "python -m usssa_leaderboard.main"
+#quick = "python -m usssa_leaderboard.main"

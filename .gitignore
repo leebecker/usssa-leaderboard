@@ -1,0 +1,18 @@
+Dockerfile.actual
+
+*.xml
+*.iml
+.idea
+__pycache__
+*.pyc*
+*-checkpoint.ipynb
+.python-version
+
+# OS specific
+.DS_Store
+
+# Ignore virtual environment
+.venv
+
+
+**/tb_logs
