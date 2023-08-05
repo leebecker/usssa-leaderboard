@@ -2,13 +2,13 @@
 <template>
     <h2>Update Category Results</h2>
 
-    Select <i>category</i> along with associated options.
+    <!-- Select <i>category</i> along with associated options. -->
 
-    <CategorySelector 
+    <TheCategoryUpdateForm 
+      :slug="leaderboard.slug"
       :categories="leaderboard.categories" 
       :category_results="leaderboard.category_results"
       :contingents="leaderboard.contingents"
-
     />
 
 
@@ -17,7 +17,7 @@
 
 <script>
 import axios from 'axios'
-import CategorySelector from './CategorySelector.vue'
+import TheCategoryUpdateForm from './TheCategoryUpdateForm.vue'
 
 export default {
   name: 'AdminUpdateForm',
@@ -54,9 +54,10 @@ export default {
       //console.log(this.leaderboard.contingents)
       console.log(this.leaderboard);
   },
-  components: { CategorySelector },
+  components: { TheCategoryUpdateForm: TheCategoryUpdateForm },
   computed: {
     totalEventCategories() {
+      console.log(this.leaderboard)
       // Compute total number of event categories by
       // summing all combinations of (event, class, gender)
       var totalEvents = 0;
