@@ -1,24 +1,77 @@
 <template>
     <h1>{{ leaderboard.name }} </h1>
     <div class="leaderboard">
-      <div class="div-table">
+      <div class="divTable">
         <div class="divTableHeadRow">
           <div class="divTableHead">Rank</div>
           <div class="divTableHead">Contingent</div>
-          <div class="divTableHead" color->Country</div>
-          <div class="divTableHeadGold">Gold</div>
-          <div class="divTableHeadSilver">Silver</div>
-          <div class="divTableHeadBronze">Bronze</div>
-          <div class="divTableHead">Total Points</div>
+          <div class="divTableHead">
+            <span class="fullTitle">Country</span>
+            <span class="abbrTitle">Ctry</span>
+          </div>
+          <div class="divTableHeadGold">
+            <span class="fullTitle">Gold</span>
+            <span class="abbrTitle">G</span>
+          </div>
+          <div class="divTableHeadSilver">
+            <span class="fullTitle">Silver</span>
+            <span class="abbrTitle">S</span>
+          </div>
+          <div class="divTableHeadBronze">
+            <span class="fullTitle">Bronze</span>
+            <span class="abbrTitle">B</span>
+          </div>
+          <div class="divTableHead">
+            <span class="fullTitle">Total Points</span>
+            <span class="abbrTitle">Pts</span>
+          </div>
         </div>
-          <div class="divTableBody">
+        <div class="divTableBody">
             <LeaderboardTableRow v-for="(standing, index) in leaderboard.rankings" 
             :key="standing.contingent_id"
             :rowIndex="index"
             :standing="standing"
             :contingent="leaderboard.idToContingent[standing.contingent_id]" />
+        </div>
+      </div>
+
+        <div class="divLogo">
+          <img :src="require(`@/assets/T5-chalice-logo-large.png`)"/>
+        </div>
+
+      <div class="divTable">
+        <div class="divTableHeadRow" id="secondHeader">
+          <div class="divTableHead">Rank</div>
+          <div class="divTableHead">Contingent</div>
+          <div class="divTableHead" color->Country</div>
+          <div class="divTableHeadGold">
+            <span class="fullTitle">Gold</span>
+            <span class="abbrTitle">G</span>
+          </div>
+          <div class="divTableHeadSilver">
+            <span class="fullTitle">Silver</span>
+            <span class="abbrTitle">S</span>
+          </div>
+          <div class="divTableHeadBronze">
+            <span class="fullTitle">Bronze</span>
+            <span class="abbrTitle">B</span>
+          </div>
+          <div class="divTableHead">
+            <span class="fullTitle">Total Points</span>
+            <span class="abbrTitle">Pts</span>
           </div>
         </div>
+        <div class="divTableBody">
+            <LeaderboardTableRow v-for="(standing, index) in leaderboard.rankings" 
+            :key="standing.contingent_id"
+            :rowIndex="index"
+            :standing="standing"
+            :contingent="leaderboard.idToContingent[standing.contingent_id]" />
+        </div>
+      </div>
+      </div>
+
+    <div>
       <h3>Reporting {{ leaderboard.category_results.length}} / {{ totalEventCategories }} categories. </h3>
     </div>
   </template>
@@ -39,7 +92,8 @@
               contingents: [],
               standings: [],
               categories: [],
-              category_results: []
+              category_results: [],
+              idToContingent: []
             }
         };
     },
@@ -96,10 +150,108 @@
   a {
     color: #42b983;
   }
+  .leaderboard {
+    font-size: large;
+  }
 
-  .div-table{
+  .leaderboard:after {
+    /*display: flex;
+    flex-wrap: wrap;*/
+    display: table;
+    clear: both;
+
+  }
+
+  /*
+  .divTable {
+    display: table;
+    width: 100%;
+  }
+  */
+
+.divTable {
+  float: left;
+  width: 40%;
+  margin: 2px;
+}
+
+.divLogo {
+  float: left;
+}
+
+.fullTitle {
+  display: inline;
+}
+.abbrTitle {
+  display: none;
+}
+/*
+.divTableLeft{
 	display: table;
-	width: 90%;
+	width: 45%;
+  margin: 5px;
+}
+.divTableRight{
+	display: table;
+	width: 50%;
+  margin: 5px;
+}
+*/
+
+@media screen and (max-width: 700px) {
+    .leaderboard {
+      font-size: small;
+    }
+
+  .fullTitle {
+    display: none;
+  }
+  .abbrTitle {
+    display: inline;
+  }
+  .divLogo {
+    /*transform: scale(0.5, 0.5);
+    flex-wrap: wrap;*/
+    display: none;
+
+  }
+}
+
+@media screen and (max-width: 1440px) {
+    .leaderboard {
+      font-size: small;
+    }
+    .divTable {
+      width: 100%;
+    }
+    .divLogo {
+      width: 100%;
+    }
+    
+    #secondHeader, #secondGold, #secondSilver, #secondBronze{
+      opacity: 0.0;
+      color: #FFFFFF;
+      background-color: #FFFFFF;
+      height: 5px;
+    }
+}
+
+@media screen and (max-width: 1200px) {
+    .leaderboard {
+      font-size: medium;
+    }
+    /*
+    .divTable {
+      width: 100%;
+    }
+    */
+    
+    #secondHeader, #secondGold, #secondSilver, #secondBronze{
+      opacity: 0.0;
+      color: #FFFFFF;
+      background-color: #FFFFFF;
+      height: 5px;
+    }
 }
 
 .divTableHeadRow {
@@ -113,7 +265,6 @@
 	border: 1px solid #999999;
 	display: table-cell;
 	padding: 3px 10px;
-  font-size: x-large;
   vertical-align: middle;
 }
 
@@ -123,7 +274,6 @@
 	padding: 3px 10px;
   color: #000000;
   background-color: #D4AF37;
-  font-size: x-large;
   vertical-align: middle;
 }
 
@@ -133,7 +283,6 @@
 	padding: 3px 10px;
   color: #000000;
   background-color: #C0C0C0;
-  font-size: x-large;
   vertical-align: middle;
 }
 
@@ -143,7 +292,6 @@
 	padding: 3px 10px;
   color: #000000;
   background-color: #B08D57;
-  font-size: x-large;
   vertical-align: middle;
 }
 .divTableBody {

@@ -2,7 +2,12 @@
     <div class="divTableRow" :class="{divTableRowEven: isEvenRow}">
         <div class="divTableCell">{{standing.rank}}</div>
         <div class="divTableCell">{{contingent.name}}</div>
-        <div class="divTableCell"><img :src="require(`@/assets/flags/84x63/${countryCodeLower}.png`)" :alt="contingent.country"></div>
+        <div class="divTableCell">
+            <img v-if="isValidCountry" :src="require(`@/assets/flags/84x63/${countryCodeLower}.png`)" :alt="contingent.country" class="fullImg">
+            <span v-else class="fullImg"> -- </span>
+            <img v-if="isValidCountry" :src="require(`@/assets/flags/84x63/${countryCodeLower}.png`)" :alt="contingent.country" class="smallImg">
+            <span v-else class="smallImg"> -- </span>
+        </div>
         <div class="divTableCell">{{standing.gold}}</div>
         <div class="divTableCell">{{standing.silver}}</div>
         <div class="divTableCell">{{standing.bronze}}</div>
@@ -31,10 +36,10 @@
         countryCodeLower() {
             return this.contingent.country.toLowerCase()
         },
+        isValidCountry() {
+            return (this.contingent.country.toUpperCase() != "SG")
+        },
         isEvenRow() {
-            console.log(this)
-            console.log("ROW ")
-            console.log(this.rowIndex)
             return this.rowIndex % 2 == 0;
         }
     }
@@ -45,18 +50,19 @@
 .divTableRow {
 	display: table-row;
     background-color: #E0E0E0;
+    /*height: 80px;*/
 }
 
 .divTableRowEven {
 	display: table-row;
     background-color: #FFFFFF;
+    /*height: 80px;*/
 }
 
 .divTableCell {
 	border: 1px solid #999999;
 	display: table-cell;
-	padding: 3px 10px;
-    font-size: x-large;
+	padding: 0px 0px;
     vertical-align: middle;
 }
 
@@ -64,6 +70,27 @@
 	background-color: #EEE;
 	display: table-footer-group;
 	font-weight: bold;
+}
+
+.fullImg {
+    display: inline;
+      transform: scale(0.5, 0.5);
+}
+.smallImg {
+    display: none;
+      transform: scale(0.25, 0.25);
+
+}
+
+@media screen and (max-width: 500px) {
+    .fullImg {
+      display: none;
+      transform: scale(0.5, 0.5);
+    }
+    .smallImg {
+      display: inline;
+      transform: scale(0.25, 0.25);
+    }
 }
 
 </style>
