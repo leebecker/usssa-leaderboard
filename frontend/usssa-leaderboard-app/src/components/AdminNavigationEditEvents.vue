@@ -1,13 +1,11 @@
 
 <template>
-    <!-- Select <i>category</i> along with associated options. -->
-
     <AccordionList>
       <AccordionItem>
         <template #summary>Add Teams</template>
         <template #icon>&#128101;&#128681;</template>
 
-        <TheContingentUpdateForm 
+        <AdminFormContingentUpdate 
           :slug="leaderboard.slug"
           :categories="leaderboard.categories" 
           :category_results="leaderboard.category_results"
@@ -18,7 +16,7 @@
         <template #summary>Update Category Results</template>
         <template #icon>&#129351;&#129352;&#129353;</template>
 
-        <TheCategoryUpdateForm 
+        <AdminFormCategoryUpdate 
           :slug="leaderboard.slug"
           :categories="leaderboard.categories" 
           :category_results="leaderboard.category_results"
@@ -32,18 +30,17 @@
 
 <script>
 import axios from 'axios'
-import TheCategoryUpdateForm from './TheCategoryUpdateForm.vue'
-import TheContingentUpdateForm from './TheContingentUpdateForm.vue'
+import AdminFormCategoryUpdate from './AdminFormCategoryUpdate.vue';
+import AdminFormContingentUpdate from './AdminFormContingentUpdate.vue';
 import { AccordionList, AccordionItem } from  "vue3-rich-accordion";
 
 
 export default {
-  name: 'AdminUpdateForm',
+  name: 'AdminNavigationEditEvents',
   props: {
       slug: String
   },
   data() {
-    console.log("HERE WE ARE IS THIS RIGHT?")
       return {
           // initialize to an empty list
           leaderboard: {
@@ -73,26 +70,12 @@ export default {
       console.log(this.leaderboard);
   },
   components: { 
-    TheCategoryUpdateForm: TheCategoryUpdateForm,
-    TheContingentUpdateForm: TheContingentUpdateForm,
-    AccordionList: AccordionList,
-    AccordionItem: AccordionItem,
+    AdminFormCategoryUpdate,
+    AdminFormContingentUpdate,
+    AccordionList,
+    AccordionItem,
   },
   computed: {
-    totalEventCategories() {
-      console.log(this.leaderboard)
-      // Compute total number of event categories by
-      // summing all combinations of (event, class, gender)
-      var totalEvents = 0;
-      this.leaderboard.categories.forEach(categoryDef => {
-        var c = 1;
-        Object.entries(categoryDef).forEach(categoryProp => {
-          c *= categoryProp.length;
-        })
-        totalEvents += c
-      });
-      return totalEvents;
-    }
 
   }
 }

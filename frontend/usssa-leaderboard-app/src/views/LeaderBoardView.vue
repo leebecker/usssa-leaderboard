@@ -1,6 +1,6 @@
 <template>
   <LeaderBoardTable
-    slug="t5-championship-2023"
+    :slug="leaderboard_slug"
   />
 </template>
 
@@ -9,9 +9,14 @@
 import LeaderBoardTable from '@/components/LeaderBoardTable.vue'
 
 export default {
-  name: 'HomeView',
+  name: 'LeaderBoardView',
   components: {
     LeaderBoardTable
+  },
+  data() {
+    return {
+      leaderboard_slug: this.$route.params.slug
+    }
   }
 }
 </script>

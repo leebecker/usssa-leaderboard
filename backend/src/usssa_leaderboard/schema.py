@@ -12,6 +12,9 @@ from usssa_leaderboard.db import db, PyObjectId
 
 import nanoid
 
+import pydantic
+pydantic.json.ENCODERS_BY_TYPE[ObjectId]=str
+
 
 class AwardValues(BaseModel):
     gold: Union[float, int]
@@ -109,10 +112,7 @@ class Leaderboard(BaseModel):
         return new_result_key in (r.category.flattened() for r in self.category_results)
 
     def is_existing_contingent(self, contingent: Contingent):
-        print(contingent.name)
-        print([c.name for c in self.contingents])
         res = contingent.name in (c.name for c in self.contingents)
-        print("res=", res)
         return res
 
     def compute_rankings(self) -> List[Ranking]:
@@ -136,6 +136,15 @@ class Leaderboard(BaseModel):
         return rankings
 
 
+
+    class Config:
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: str}
+
+
+class LeaderboardList(BaseModel):
+    leaderboards: List[Leaderboard]
 
     class Config:
         allow_population_by_field_name = True

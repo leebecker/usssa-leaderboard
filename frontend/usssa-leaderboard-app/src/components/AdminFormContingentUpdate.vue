@@ -75,6 +75,7 @@ import axios from 'axios'
 import countries from '../assets/country_names.json'
 
 export default {
+    name: "AdminFormContingentUpdate",
     data() {
         var emptyContingent = { 
             name: '', country: '', is_national_federation: false 

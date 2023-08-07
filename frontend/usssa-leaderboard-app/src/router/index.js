@@ -1,11 +1,15 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
 
 const routes = [
   {
     path: '/',
-    name: 'home',
-    component: HomeView
+    name: 'root',
+    component: () => import('../views/RootView.vue')
+  },
+  {
+    path: '/:slug',
+    name: 'leaderboard',
+    component: () => import('../views/LeaderBoardView.vue')
   },
   {
     path: '/admin',
@@ -13,7 +17,15 @@ const routes = [
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/AdminView.vue')
+    component: () => import('../views/AdminRootView.vue')
+  },
+  {
+    path: '/admin/:slug',
+    name: 'adminEvent',
+    // route level code-splitting
+    // this generates a separate chunk (about.[hash].js) for this route
+    // which is lazy-loaded when the route is visited.
+    component: () => import('../views/AdminEventView.vue')
   }
 ]
 

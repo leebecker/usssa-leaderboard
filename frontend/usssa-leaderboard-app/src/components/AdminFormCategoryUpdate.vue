@@ -95,6 +95,7 @@
 import axios from 'axios'
 
 export default {
+    name: "AdminFormCategoryUpdate",
     data() {
         return  {
             selectedCategory: {

@@ -17,9 +17,13 @@ from .schema import (
     Contingent,
     ContingentBatch,
     Leaderboard,
+    LeaderboardList,
     Ranking,
     UpdateLeaderboard
 )
+
+import pydantic
+pydantic.json.ENCODERS_BY_TYPE[ObjectId]=str
 
 
 app = FastAPI()
@@ -44,8 +48,36 @@ async def startup():
     await db.leaderboards.create_index("slug", unique=True)
     await db.category_results.create_index("slug", unique=True)
 
+async def find_leaderboards():
 
-@app.post("/leaderboards")
+    collection = db["leaderboards"]
+    print(collection)
+    leaderboards = []
+    async for leaderboard in collection.find():
+        leaderboards.append(leaderboards)
+        
+
+
+@app.get(
+    "/leaderboards",
+    response_model=LeaderboardList,
+    status_code=status.HTTP_200_OK
+)
+async def get_leaderboards() -> LeaderboardList:
+    collection = db["leaderboards"]
+    print(collection)
+    leaderboards = []
+    for leaderboard in await collection.find().to_list(length=100):
+        leaderboards.append(leaderboard)
+        
+    return LeaderboardList(leaderboards=leaderboards)
+
+
+
+@app.post(
+    "/leaderboards",
+    response_model=Leaderboard,
+    status_code=status.HTTP_201_CREATED)
 async def create_leaderboard(leaderboard:UpdateLeaderboard=Body(...)):
     leaderboard = jsonable_encoder(leaderboard)
     # compute and add slug
@@ -62,7 +94,8 @@ async def create_leaderboard(leaderboard:UpdateLeaderboard=Body(...)):
 @app.get(
     "/leaderboards/{slug}",
     response_model=Leaderboard,
-    status_code=status.HTTP_200_OK)
+    status_code=status.HTTP_200_OK
+)
 async def get_leaderboard(slug: str) -> Leaderboard:
     leaderboard = await db["leaderboards"].find_one({"slug": slug})
 
