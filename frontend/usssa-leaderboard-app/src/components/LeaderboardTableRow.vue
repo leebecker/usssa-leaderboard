@@ -1,7 +1,7 @@
 <template>
     <div class="divTableRow" :class="{divTableRowEven: isEvenRow}">
         <div class="divTableCell">{{standing.rank}}</div>
-        <div class="divTableCell">{{contingent.name}}</div>
+        <div class="divTableCellContingent">{{contingent.name}}</div>
         <div class="divTableCell">
             <img v-if="isValidCountry" :src="require(`@/assets/flags/84x63/${countryCodeLower}.png`)" :alt="contingent.country" class="fullImg">
             <span v-else class="fullImg"> -- </span>
@@ -37,7 +37,7 @@
             return this.contingent.country.toLowerCase()
         },
         isValidCountry() {
-            return (this.contingent.country.toUpperCase() != "SG")
+            return this.contingent.is_national_federation
         },
         isEvenRow() {
             return this.rowIndex % 2 == 0;
@@ -65,6 +65,15 @@
 	padding: 0px 0px;
     vertical-align: middle;
 }
+
+.divTableCellContingent {
+	border: 1px solid #999999;
+	display: table-cell;
+	padding: 0px 5px;
+    vertical-align: middle;
+    text-align: left;
+}
+
 
 .divTableFoot {
 	background-color: #EEE;

@@ -1,6 +1,6 @@
 <template>
   <div class="about">
-    <h1>T5 Championship Medal Standings Admin</h1>
+    <h1>Leaderboard Admin</h1>
   </div>
   <AdminUpdateForm
     slug="t5-championship-2023"

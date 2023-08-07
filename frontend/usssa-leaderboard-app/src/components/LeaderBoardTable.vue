@@ -38,37 +38,6 @@
         <div class="divLogo">
           <img :src="require(`@/assets/T5-chalice-logo-large.png`)"/>
         </div>
-
-      <div class="divTable">
-        <div class="divTableHeadRow" id="secondHeader">
-          <div class="divTableHead">Rank</div>
-          <div class="divTableHead">Contingent</div>
-          <div class="divTableHead" color->Country</div>
-          <div class="divTableHeadGold">
-            <span class="fullTitle">Gold</span>
-            <span class="abbrTitle">G</span>
-          </div>
-          <div class="divTableHeadSilver">
-            <span class="fullTitle">Silver</span>
-            <span class="abbrTitle">S</span>
-          </div>
-          <div class="divTableHeadBronze">
-            <span class="fullTitle">Bronze</span>
-            <span class="abbrTitle">B</span>
-          </div>
-          <div class="divTableHead">
-            <span class="fullTitle">Total Points</span>
-            <span class="abbrTitle">Pts</span>
-          </div>
-        </div>
-        <div class="divTableBody">
-            <LeaderboardTableRow v-for="(standing, index) in leaderboard.rankings" 
-            :key="standing.contingent_id"
-            :rowIndex="index"
-            :standing="standing"
-            :contingent="leaderboard.idToContingent[standing.contingent_id]" />
-        </div>
-      </div>
       </div>
 
     <div>
@@ -266,6 +235,14 @@
 	display: table-cell;
 	padding: 3px 10px;
   vertical-align: middle;
+}
+
+.divTableHeadContingent {
+	border: 1px solid #999999;
+	display: table-cell;
+	padding: 3px 10px;
+  vertical-align: middle;
+  text-align: left;
 }
 
 .divTableHeadGold {
