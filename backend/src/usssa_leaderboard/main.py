@@ -105,9 +105,48 @@ async def create_category_results(slug, category_result: CategoryResult):
 async def create_contingent(slug, contingent:Contingent):
     return {"message": "success"}
 
-@app.post("/leaderboard/{slug}/contingents/batch")
+@app.post(
+    "/leaderboards/{slug}/contingents/batch",
+    response_model=Leaderboard,
+    status_code=status.HTTP_201_CREATED
+)
 async def create_contingent_batch(slug, batch:ContingentBatch):
-    return {"message": "success"}
+    leaderboard = await db.leaderboards.find_one({"slug": slug})
+    leaderboard = Leaderboard.parse_obj(leaderboard)
+
+    batch_values = []
+    for contingent in batch.contingents:
+        print(contingent)
+        if leaderboard.is_existing_contingent(contingent):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={"message": f"Contingent {contingent.name} already exists in leaderboard {slug}"}
+            )
+        else:
+            batch_values.append(contingent.dict())
+
+    print(batch_values)
+    original_leaderboard = await db.leaderboards.find_one_and_update(
+        {"slug": slug},
+        {"$push": {"contingents": {"$each": batch_values }}}
+    )
+
+    print("updating rankings")
+    # update rankings
+    updated_leaderboard = await db.leaderboards.find_one({"slug": slug})
+    leaderboard = Leaderboard.parse_obj(updated_leaderboard)
+    rankings = [Ranking.dict(r) for r in leaderboard.compute_rankings()]
+    updated_leaderboard = await db.leaderboards.find_one_and_update(
+        {"slug": slug},
+        {"$set": {"rankings": rankings}}
+    )
+
+    print("returning")
+
+    updated_leaderboard = await db.leaderboards.find_one({"slug": slug})
+    return updated_leaderboard
+
+    #return {"message": "success"}
 
 
 #@app.patch("/leaderboard/{slug}/rankings")

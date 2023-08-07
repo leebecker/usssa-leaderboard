@@ -71,6 +71,7 @@ class Contingent(BaseModel):
     id: Optional[str] = Field(default_factory=lambda: nanoid.generate(size=8))
     name: str
     country: str # fixme - this needs to generalize into a more flexible rendering for state, city, logo, etc
+    is_national_federation: bool
 
 class ContingentBatch(BaseModel):
     contingents: List[Contingent]
@@ -106,6 +107,13 @@ class Leaderboard(BaseModel):
     def is_existing_category_result(self, result: CategoryResult):
         new_result_key = result.category.flattened()
         return new_result_key in (r.category.flattened() for r in self.category_results)
+
+    def is_existing_contingent(self, contingent: Contingent):
+        print(contingent.name)
+        print([c.name for c in self.contingents])
+        res = contingent.name in (c.name for c in self.contingents)
+        print("res=", res)
+        return res
 
     def compute_rankings(self) -> List[Ranking]:
         
