@@ -1,94 +1,7 @@
-<template>
-    <button @click="addCategory">+ Category</button>
-    <div v-for="category, categoryIdx in categories" :key="category.name">
-    <AdminFormCreateEventCategory
-      v-model="categories[categoryIdx]"
-    ></AdminFormCreateEventCategory>
-    </div>
-
-    <div class="formRow">
-        <div class="formLabel">
-            <h4>Short Name</h4>
-        </div>
-        <div class="formInput">
-            <input placeholder="Enter short name" size="50">
-            <p>(This name is used to generate URLs, e.g. T5 Championship 2023)</p>
-        </div>
-    </div>
-    <div class="formRow">
-        <div class="formLabel">
-            <h4>Description</h4>
-        </div>
-        <div class="formInput">
-            <input placeholder="Enter display name" size="50">
-            <p>(This is the display name, e.g. T5 Liberty Chalice Championship 2023)</p>
-        </div>
-    </div>
-
-    <div class="formRow">
-        <div class="formLabel">
-            <h4>Award Values</h4>
-        </div>
-        <div class="formInput">
-            <p>
-              Gold: <vue-number-input v-model="award_values.gold" :min="0" :max="100" size="small" inline center controls></vue-number-input>
-            </p>
-            <p>
-              Silver: <vue-number-input v-model="award_values.silver" :min="0" :max="100" size="small" inline center controls></vue-number-input>
-            </p>
-            <p>
-              Bronze: <vue-number-input v-model="award_values.bronze" :min="0" :max="100" size="small" inline center controls></vue-number-input>
-            </p>
-        </div>
-    </div>
-
-
-    <div class="formRow">
-        <div class="formLabel">
-            <h4>Categories</h4>
-        </div>
-        <div class="addCategory">
-
-          <div class="formInput">
-              <div class="formList"
-                v-for="category, categoryIdx in categories" 
-                :key="categoryIdx" >
-                <label>{{categoryIdx}}. Category </label>
-                <input 
-                  v-model="categories[categoryIdx].name"
-                  placeholder="Enter category name" size="50">
-                <button v-if="!categoryIdx" @click="addCategory">+</button>
-
-                <div class="formList"
-                  v-for="field, fieldIdx in category.fields" :key="fieldIdx">
-                  <label>Field: </label>
-                  <input
-                    v-model="category.fields[fieldIdx].name"
-                    placeholder="Enter field name" size="50">
-                  <button v-if="!categoryIdx && !fieldIdx" @click="addField(category)">+</button>
-
-                  <div class="formList"
-                    v-for="option, optionIdx in field.options" :key="optionIdx"
-                  >
-                    <label >Option: </label>
-                    <button v-if="!categoryIdx && !fieldIdx && !optionIdx"
-                      @click="addOption(field)">+</button>
-                    <input 
-                      placeholder="Enter option name" size="50">
-                  </div>
-                </div>
-              </div>
-          </div>
-      </div>
-    </div>
-      <button @click="submit">Submit</button>
-
-</template>
-
 
 <script>
 
-
+import axios from 'axios'
 import AdminFormCreateEventCategory from './AdminFormCreateEventCategory.vue'
 
 export default {
@@ -96,19 +9,19 @@ export default {
   props: {
   },
   data() {
-
-    return {
+    const defaultCategories = [ this.createCategory() ]
+    var data = {
+      name: '',
+      description: '',
       award_values: {
         gold: 100,
         silver: 70,
         bronze: 40
       },
       value: 10,
-      categories: [ this.createCategory() ],
+      categories: defaultCategories
     }
-  },
-  computed: {
-
+    return data;
   },
   methods: {
     createField() {
@@ -133,9 +46,33 @@ export default {
       field.options.push('')
     },
     submit() {
-      console.log("SUBMIT")
-      console.log(this.categories)
-
+      var eventData = {
+        name: this.name,
+        description: this.description,
+        award_values: this.award_values,
+        categories: this.categories,
+        contingents: []
+      };
+      console.log(eventData)
+      this.postEvent(eventData);
+    },
+    clear() {
+      this.name = ''
+      this.description = ''
+      this.award_values = {
+        gold: 100,
+        silver: 70,
+        bronze: 40
+      },
+      this.categories = [this.createCategory()]
+    },
+    async postEvent(eventData) {
+            await axios.post(`http://127.0.0.1:8000/leaderboards`, eventData).then(response => {
+                console.log(response.data);
+                // TODO event bus the leaderboard
+                // this.category_results = response.data.category_results
+                return response.data;
+            });
     }
 
   },
@@ -186,3 +123,61 @@ export default {
 }
 </style>
 
+<template>
+    <div class="formRow">
+        <div class="formLabel">
+            <h4>Short Name</h4>
+        </div>
+        <div class="formInput">
+            <input 
+              v-model="name"
+              placeholder="Enter short name" size="50">
+            <p>(This name is used to generate URLs, e.g. T5 Championship 2023)</p>
+        </div>
+    </div>
+    <div class="formRow">
+        <div class="formLabel">
+            <h4>Description</h4>
+        </div>
+        <div class="formInput">
+            <input 
+              v-model="description"
+              placeholder="Enter display name" size="50">
+            <p>(This is the display name, e.g. T5 Liberty Chalice Championship 2023)</p>
+        </div>
+    </div>
+
+    <div class="formRow">
+        <div class="formLabel">
+            <h4>Award Values</h4>
+        </div>
+        <div class="formInput">
+            <p>
+              Gold: <vue-number-input v-model="award_values.gold" :min="0" :max="100" size="small" inline center controls></vue-number-input>
+            </p>
+            <p>
+              Silver: <vue-number-input v-model="award_values.silver" :min="0" :max="100" size="small" inline center controls></vue-number-input>
+            </p>
+            <p>
+              Bronze: <vue-number-input v-model="award_values.bronze" :min="0" :max="100" size="small" inline center controls></vue-number-input>
+            </p>
+        </div>
+      </div>
+    <div class="formRow">
+        <div class="formLabel">
+          <h4>Categories</h4>
+          <button @click="addCategory">+ Category</button>
+        </div>
+        <div class="formInput">
+          <AdminFormCreateEventCategory 
+            v-for="category, categoryIdx in categories"
+            :key="categoryIdx"
+            v-model="categories[categoryIdx]"/>
+        </div>
+
+    </div>
+
+    <button @click="submit">Submit</button>
+    <button @click="clear">Clear</button>
+
+</template>

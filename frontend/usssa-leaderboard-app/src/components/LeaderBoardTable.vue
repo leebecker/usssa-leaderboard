@@ -70,6 +70,15 @@
         async getLeaderBoard() {
             await axios.get(`http://127.0.0.1:8000/leaderboards/${this.slug}`).then(response => {
                 this.leaderboard = response.data;
+                if (this.leaderboard.categories == null) {
+                  this.leaderboard.categories = []
+                }
+                if (this.leaderboard.category_results == null) {
+                  this.leaderboard.category_results = []
+                }
+                if (this.leaderboard.contingents == null) {
+                  this.leaderboard.contingents = []
+                }
                 this.leaderboard.idToContingent = Object.fromEntries(
                   this.leaderboard.contingents.map(c => [c.id, c])
                 );

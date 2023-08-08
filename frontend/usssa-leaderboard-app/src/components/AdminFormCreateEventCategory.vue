@@ -1,55 +1,26 @@
-<template>
-    <div class="category">
-        <label>Category: </label>
-        <div class="categoryInput"></div>
-            <input 
-                :v-model="category.name"
-                placeholder="Enter category name" size="25">
-
-            <div class="field" 
-                v-for="field, fieldIdx in category.fields"
-                :key="fieldIdx">
-
-                <div class="fieldInput">
-                    <label>Field: </label>
-                    <input
-                        v-model="field.name"
-                        placeholder="Enter field name" size="25">
-
-                    <div class="optionDiv">
-                        <div class="optionLabel"></div>
-
-                                <label>Options: </label>
-                        </div>
-                        <div class="optionInput">
-                            <input 
-                                v-for="option, optionIdx in category.fields[fieldIdx].options"
-                                :key="optionIdx"
-                                v-model="category.fields[fieldIdx].options[optionIdx]"
-                                placeholder="option" size="25">
-                        </div>
-                        <button @click="addOption(field)">+</button>
-                    </div>
-                </div>
-                <button @click="addField()">+</button>
-            </div>
-
-</template>
-
-
 <script>
+import { computed, defineComponent } from 'vue'
 
-export default {
-  name: 'AdminFormCreateEvent',
+export default defineComponent({
+  name: 'AdminFormCreateEventCategory',
+  emits: ['update:modelValue'],
   props: {
+        modelValue: {
+            type: Object,
+            default: () => (this.createCategory()
+            // {
+            //     'name': '',
+            //     'fields': [{name: '', options:['']}]
+            // })
+            )
+        }
   },
-  data() {
-    return {
-        category : this.createCategory()
-    }
-  },
-  computed: {
-
+  setup(props, {emit}) {
+    const theCategory = computed({
+        get: () => props.modelValue,
+        set: (value) => emit('update:modelValue', value)
+    });
+    return { theCategory };
   },
   methods: {
     createField() {
@@ -65,19 +36,21 @@ export default {
       }
     },
     addField() {
-        this.category.fields.push(this.createField())
+        this.theFields.push(this.createField())
     },
     addOption(field) {
-        console.log(field)
         field.options.push('')
-        console.log(this.category.fields[0])
-    }
+    },
+
 
   },
-  components: {
-    //VueNumericInput
+  computed: {
+    theFields() {
+        return this.theCategory.fields
+    }
+
   }
-}
+});
 </script>
 
 
@@ -92,17 +65,62 @@ export default {
     text-align: left;
 }
 
-.category {
-    display: flex;
+#category {
+    grid-template-columns: [category] 1fr [field] 3fr [endCategory];
+    display: grid;
+    grid-auto-flow: aut;
+    /* display: flex;
     flex-direction: row;
-    align-self: start;
+    align-self: start; */
 }
 
+.categoryItem {
+    grid-column-start: 0;
+    display: flex;
+}
+
+.fieldArea {
+    grid-column: field / endCategory;
+    grid-template-columns: [fieldInput] 1fr [optionInput] 1fr [endField];
+    display: inline-flex;
+    margin-left: 10px
+}
+
+.fieldItem {
+    grid-column-start: fieldInput;
+    grid-row-end: span optionInput;
+    display: inline-flex;
+}
+
+.optionArea {
+    grid-column-start: optionInput;
+    grid-column-end: endField;
+    grid-template-columns: [optionStart] 1fr [optionIn] 1fr [optionEnd];
+    display: flex;
+    margin-left: 10px;
+}
+
+.optionLabel {
+    grid-column: 1;
+
+}
+.optionLabel {
+    grid-column: 2;
+    display: inline-flex;
+}
+
+
 .categoryInput {
+    grid-row-start: 1;
+    background-color: peru;
+    /*
     text-align: left;
     display: flex;
     flex-direction: row;
     justify-content: flex-start;
+    flex-wrap: nowrap;
+    */
+
 }
 
 .field button {
@@ -113,31 +131,9 @@ export default {
 .field {
     display: flex;
     flex-direction: row;
-    flex-wrap: wrap;
     align-self: start;
-
-}
-
-.fieldInput {
-
-    display: flex;
-    flex-direction: column;
+    margin-left: 5em;
     flex-wrap: nowrap;
-    align-self: start;
-}
-
-.optionDiv {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    align-self: start;
-}
-
-
-.optionLabel {
-    display: flex;
-    flex-direction: row;
-
 
 }
 
@@ -146,47 +142,7 @@ export default {
     flex-direction: column;
 }
 
-
-.rowLabel {
-
-}
-
-.rowInput {
-    align-items: flex-start
-
-}
-
-
-.formLabel {
-	display: table-cell;
-    padding: 20px;
-}
-
-.formInput {
-	display: table-cell;
-    align-items: flex-start;
-}
-
-
-.formOptionList {
-    column-count: 3;
-}
-
-.formList {
-  margin-left: 20px;
-
-}
-
-.submittedCategories {
-    text-align: left;
-
-}
-.vue-number-input + .vue-number-input {
-  margin-left: 1rem;
-}
-
 input {
-    display: block;
     align-self: start;
 
 }
@@ -196,3 +152,47 @@ button {
 
 }
 </style>
+
+
+<template>
+    <div id="category">
+        <div class="categoryItem">
+        category: 
+        <input 
+                v-model="theCategory.name"
+                placeholder="Enter category name" size="25"
+                >
+        
+        </div>
+        <div class="fieldArea"
+            v-for="field, fieldIdx in theFields"
+            :key="fieldIdx"
+        >
+            <div class="fieldItem">
+                field:
+                <input
+                        v-model="theFields[fieldIdx].name"
+                        placeholder="Enter field name" size="25">
+                <button 
+                    v-if="fieldIdx == 0"
+                    @click="addField()">+</button>
+            </div>
+            <div class="optionArea">
+
+                options: 
+                <div class="optionInput">
+                    <div class="optionItem"
+                        v-for="option, optionIdx in theFields[fieldIdx].options" :key="optionIdx">
+                            <input 
+                                v-model="theFields[fieldIdx].options[optionIdx]"
+                                placeholder="option" size="25">
+                    </div>
+                    <button @click="addOption(field)">+</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+</template>

@@ -41,6 +41,7 @@ export default {
       slug: String
   },
   data() {
+    console.log("init data");
       return {
           // initialize to an empty list
           leaderboard: {
@@ -60,6 +61,12 @@ export default {
                 this.leaderboard.contingents.map(c => [c.id, c])
               );
               console.log(this.leaderboard)
+              if (this.leaderboard.category_results == null) {
+                this.leaderboard.category_results = []
+              }
+              if (this.leaderboard.contingents == null) {
+                this.leaderboard.contingents = []
+              }
               return response.data;
           });
       }

@@ -149,7 +149,12 @@ export default {
             )
         },
         scoredCategories() {
-            return this.category_results.map(this.categoryResultToKey)
+            console.log("category_results")
+            if (this.category_results != null) {
+                return this.category_results.map(this.categoryResultToKey)
+            } else {
+                return []
+            }
         }
 
 
