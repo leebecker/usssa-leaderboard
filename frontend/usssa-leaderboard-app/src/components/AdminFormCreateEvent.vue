@@ -67,7 +67,8 @@ export default {
       this.categories = [this.createCategory()]
     },
     async postEvent(eventData) {
-            await axios.post(`http://127.0.0.1:8000/leaderboards`, eventData).then(response => {
+            var api_url = process.env.VUE_APP_LEADERBOARD_API_URL
+            await axios.post(`${api_url}/leaderboards`, eventData).then(response => {
                 console.log(response.data);
                 // TODO event bus the leaderboard
                 // this.category_results = response.data.category_results

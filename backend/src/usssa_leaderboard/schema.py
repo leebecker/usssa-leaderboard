@@ -65,9 +65,9 @@ class Category(BaseModel):
 
 class CategoryResult(BaseModel):
     category: Category
-    gold_contingent_id: str
-    silver_contingent_id: str
-    bronze_contingent_id: str
+    gold_contingent_id: List[str]       # these are arrays to allow
+    silver_contingent_id: List[str]     # for multiple winners
+    bronze_contingent_id: List[str]     # especially in bronze
 
 class Contingent(BaseModel):
 
@@ -120,15 +120,18 @@ class Leaderboard(BaseModel):
         totals = {c.id: Ranking(contingent_id=c.id) for c in self.contingents}
 
         for result in self.category_results:
-            if result.gold_contingent_id in totals:
-                totals[result.gold_contingent_id].gold += 1
-                totals[result.gold_contingent_id].points += self.award_values.gold
-            if result.silver_contingent_id in totals:
-                totals[result.silver_contingent_id].silver += 1
-                totals[result.silver_contingent_id].points += self.award_values.silver
-            if result.bronze_contingent_id in totals:
-                totals[result.bronze_contingent_id].bronze += 1
-                totals[result.bronze_contingent_id].points += self.award_values.bronze
+            for contingent_id in result.gold_contingent_id:
+                totals[contingent_id].gold += 1
+                totals[contingent_id].points += self.award_values.gold
+
+            for contingent_id in result.silver_contingent_id:
+                totals[contingent_id].silver += 1
+                totals[contingent_id].points += self.award_values.silver
+
+            for contingent_id in result.silver_contingent_id:
+                totals[contingent_id].silver += 1
+                totals[contingent_id].points += self.award_values.silver
+
 
         rankings = sorted(totals.values(), key=lambda row: (row.points, row.gold, row.silver, row.bronze), reverse=self.award_values.descending)
         for i, r in enumerate(rankings):

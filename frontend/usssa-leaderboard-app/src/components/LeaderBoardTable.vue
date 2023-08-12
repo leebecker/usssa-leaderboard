@@ -68,7 +68,11 @@
     },
     methods: {
         async getLeaderBoard() {
-            await axios.get(`http://127.0.0.1:8000/leaderboards/${this.slug}`).then(response => {
+            var service_url = process.env.VUE_APP_LEADERBOARD_API_URL;
+            console.log("TACOS AYAYAYA")
+            console.log(service_url)
+            console.log(`${service_url}/leaderboards/${this.slug}`)
+            await axios.get(`${service_url}/leaderboards/${this.slug}`).then(response => {
                 this.leaderboard = response.data;
                 if (this.leaderboard.categories == null) {
                   this.leaderboard.categories = []

@@ -30,7 +30,7 @@
         <div class="formInput">
             <div class="formOptionList">
                 <div v-for="(contingent) in contingents" :key="contingent.id">
-                    <input type="radio" v-model="goldContingent" :id="contingent.id" name="gold" :value="contingent.id" />
+                    <input type="checkbox" v-model="goldContingent[contingent.id]" :id="contingent.id" name="gold" :value="contingent.id" />
                     <label for="contingent.id">{{ contingent.name }} </label>
                 </div>
             </div>
@@ -45,7 +45,7 @@
         <div class="formInput">
             <div class="formOptionList">
                 <div v-for="(contingent) in contingents" :key="contingent.id">
-                    <input type="radio" v-model="silverContingent" :id="contingent.id" name="silver" :value="contingent.id" />
+                    <input type="checkbox" v-model="silverContingent[contingent.id]" :id="contingent.id" name="silver" :value="contingent.id" />
                     <label>{{ contingent.name }} </label>
                 </div>
             </div>
@@ -102,8 +102,8 @@ export default {
                 name: '',
                 fields: []
             },
-            goldContingent: '',
-            silverContingent: '',
+            goldContingent: {},
+            silverContingent: {},
             bronzeContingent: {},
             fieldSelections: {
                 values: []
@@ -160,21 +160,32 @@ export default {
 
     },
     methods: {
+        checkboxInputToIds(input) {
+            return Object.entries(input)
+                .filter((o) => o[1] && o[1] != null).map((o) => o[0])
+        },
         submit() {
             // build payload, 
 
+            /*
+            var goldIds = Object.entries(this.bronzeContingent)
+                .filter((o) => o[1] && o[1] != null).map((o) => o[0])
+
+            var silverIds = Object.entries(this.bronzeContingent)
+                .filter((o) => o[1] && o[1] != null).map((o) => o[0])
+
             var bronzeIds = Object.entries(this.bronzeContingent)
                 .filter((o) => o[1] && o[1] != null).map((o) => o[0])
+                */
 
             var resultsData = {
                 "category": {
                     "name": this.selectedCategory.name,
                     "fields": this.fieldSelections.values
                 },
-                "gold_contingent_id": this.goldContingent,
-                "silver_contingent_id": this.silverContingent,
-                // convert this to array
-                "bronze_contingent_id": bronzeIds[0]
+                "gold_contingent_id": this.checkboxInputToIds(this.goldContingent),
+                "silver_contingent_id": this.checkboxInputToIds(this.silverContingent),
+                "bronze_contingent_id": this.checkboxInputToIds(this.bronzeContingent)
             }
 
             console.log("payload")
@@ -187,7 +198,8 @@ export default {
                 .join('-')
         },
         async postResults(resultsData) {
-            await axios.post(`http://127.0.0.1:8000/leaderboards/${this.slug}/category_results`, resultsData).then(response => {
+            var api_url = process.env.VUE_APP_LEADERBOARD_API_URL
+            await axios.post(`${api_url}/leaderboards/${this.slug}/category_results`, resultsData).then(response => {
                 console.log(response.data);
                 // TODO event bus the leaderboard
                 //this.category_results = response.data.category_results

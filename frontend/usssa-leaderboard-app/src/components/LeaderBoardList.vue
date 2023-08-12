@@ -51,7 +51,8 @@
     },
     methods: {
         async getLeaderBoards() {
-            await axios.get(`http://127.0.0.1:8000/leaderboards`).then(response => {
+            var api_url = process.env.VUE_APP_LEADERBOARD_API_URL
+            await axios.get(`${api_url}/leaderboards`).then(response => {
                 this.leaderboards = response.data.leaderboards;
                 console.log(this.leaderboard)
                 return response.data;
