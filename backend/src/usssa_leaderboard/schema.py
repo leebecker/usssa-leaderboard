@@ -5,6 +5,7 @@ from fastapi.responses import Response, JSONResponse
 from fastapi.encoders import jsonable_encoder
 
 from pydantic import BaseModel, ConfigDict, Field, validator
+from pydantic_computed import Computed, computed
 from typing import Dict, List, Optional, Union
 
 from slugify import slugify
@@ -84,9 +85,10 @@ class Ranking(BaseModel):
     rank: int = 0
     contingent_id: str
     points: Union[int, float] = 0
-    gold: str = 0
-    silver: str = 0
-    bronze: str = 0
+    gold: int = 0
+    silver: int = 0
+    bronze: int = 0
+    medals: int = 0
 
 class UpdateRanking(BaseModel):
     contingent: Contingent
@@ -102,9 +104,52 @@ class Leaderboard(BaseModel):
     categories: List[CategoryDefinition]
     contingents: Optional[List[Contingent]] = Field(default_factory=list)
     category_results: List[CategoryResult] = Field(default_factory=list)
-    rankings: Optional[List[Ranking]] = Field(default_factory=list)
 
-    def get_contingent(cid):
+    # rankings: Optional[List[Ranking]] = Field(default_factory=list)
+    @computed('rankings')
+    def compute_rankings(
+        contingents: List[Contingent],
+        category_results: List[CategoryResult],
+        award_values: AwardValues,
+        **kwargs
+    ) -> List[Ranking]:
+        
+        totals = {c.id: Ranking(contingent_id=c.id) for c in contingents}
+
+        for result in category_results:
+            for contingent_id in result.gold_contingent_id:
+                totals[contingent_id].gold += 1
+                totals[contingent_id].medals += 1
+                totals[contingent_id].points += award_values.gold
+
+            for contingent_id in result.silver_contingent_id:
+                totals[contingent_id].silver += 1
+                totals[contingent_id].medals += 1
+                totals[contingent_id].points += award_values.silver
+
+            for contingent_id in result.silver_contingent_id:
+                totals[contingent_id].silver += 1
+                totals[contingent_id].medals += 1
+                totals[contingent_id].points += award_values.silver
+
+
+        rankings = sorted(
+            totals.values(), 
+            key=lambda row: (row.points, row.gold, row.silver, row.bronze),
+            reverse=award_values.descending
+        )
+
+        rank_idx = 0
+        last_points = None
+        for r in rankings:
+            if last_points is None or r.points < last_points:
+                rank_idx += 1
+                last_points = r.points
+            r.rank = rank_idx
+        return rankings
+
+
+    def get_contingent(self, cid):
         return next(c for c in self.contingents if c.id == cid)
 
     def is_existing_category_result(self, result: CategoryResult):
@@ -115,28 +160,6 @@ class Leaderboard(BaseModel):
         res = contingent.name in (c.name for c in self.contingents)
         return res
 
-    def compute_rankings(self) -> List[Ranking]:
-        
-        totals = {c.id: Ranking(contingent_id=c.id) for c in self.contingents}
-
-        for result in self.category_results:
-            for contingent_id in result.gold_contingent_id:
-                totals[contingent_id].gold += 1
-                totals[contingent_id].points += self.award_values.gold
-
-            for contingent_id in result.silver_contingent_id:
-                totals[contingent_id].silver += 1
-                totals[contingent_id].points += self.award_values.silver
-
-            for contingent_id in result.silver_contingent_id:
-                totals[contingent_id].silver += 1
-                totals[contingent_id].points += self.award_values.silver
-
-
-        rankings = sorted(totals.values(), key=lambda row: (row.points, row.gold, row.silver, row.bronze), reverse=self.award_values.descending)
-        for i, r in enumerate(rankings):
-            r.rank = i + 1
-        return rankings
 
 
 

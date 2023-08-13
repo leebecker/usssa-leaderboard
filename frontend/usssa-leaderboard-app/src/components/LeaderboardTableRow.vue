@@ -11,6 +11,7 @@
         <div class="divTableCell">{{standing.gold}}</div>
         <div class="divTableCell">{{standing.silver}}</div>
         <div class="divTableCell">{{standing.bronze}}</div>
+        <div class="divTableCell">{{standing.medals}}</div>
         <div class="divTableCell">{{standing.points}}</div>
     </div>
 </template>

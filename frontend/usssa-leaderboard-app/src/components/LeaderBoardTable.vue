@@ -1,13 +1,20 @@
 <template>
+    {{ columns[columnSortIdx] }} {{ cycleColumns }}
     <h1>{{ leaderboard.name }} </h1>
+
+    <label for="cycleColumns">Cycle Columns</label>
+    <input type="checkbox" v-model="cycleColumns" name="cycleColumns" />
     <div class="leaderboard">
       <div class="divTable">
         <div class="divTableHeadRow">
-          <div class="divTableHead">Rank</div>
-          <div class="divTableHead">Contingent</div>
           <div class="divTableHead">
-            <span class="fullTitle">Country</span>
-            <span class="abbrTitle">Ctry</span>
+            <span class="fullTitle">Rank 🔢</span>
+            <span class="abbrTitle">🔢</span>
+          </div>
+          <div class="divTableHead">Contingent 👥</div>
+          <div class="divTableHead">
+            <span class="fullTitle">Country 🌎</span>
+            <span class="abbrTitle">🌎</span>
           </div>
           <div class="divTableHeadGold">
             <span class="fullTitle">Gold</span>
@@ -22,12 +29,16 @@
             <span class="abbrTitle">B</span>
           </div>
           <div class="divTableHead">
-            <span class="fullTitle">Total Points</span>
-            <span class="abbrTitle">Pts</span>
+            <span class="fullTitle">Medal Count 🏅</span>
+            <span class="abbrTitle">🏅</span>
+          </div>
+          <div class="divTableHead">
+            <span class="fullTitle">Total Points 🏆</span>
+            <span class="abbrTitle">🏆</span>
           </div>
         </div>
         <div class="divTableBody">
-            <LeaderboardTableRow v-for="(standing, index) in leaderboard.rankings" 
+            <LeaderboardTableRow v-for="(standing, index) in leaderboardEntries" 
             :key="standing.contingent_id"
             :rowIndex="index"
             :standing="standing"
@@ -35,9 +46,9 @@
         </div>
       </div>
 
-        <div class="divLogo">
+        <!-- <div class="divLogo">
           <img :src="require(`@/assets/T5-chalice-logo-large.png`)"/>
-        </div>
+        </div> -->
       </div>
 
     <div>
@@ -47,6 +58,7 @@
   
   <script>
   import axios from 'axios'
+  import _ from 'lodash';
   import LeaderboardTableRow from './LeaderboardTableRow.vue'
 
   export default {
@@ -57,13 +69,23 @@
     data() {
         return {
             // initialize to an empty list
+            cycleColumns: true,
             leaderboard: {
               contingents: [],
               standings: [],
               categories: [],
               category_results: [],
               idToContingent: []
-            }
+            },
+            columns: [
+              {name:'rank', order: 'asc'},
+              {name:'gold', order: 'desc'},
+              {name:'silver', order: 'desc'},
+              {name:'bronze', order: 'desc'},
+              {name:'medals', order: 'desc'},
+              {name:'points', order: 'desc'},
+            ],
+            columnSortIdx: 0
         };
     },
     methods: {
@@ -95,9 +117,23 @@
         await this.getLeaderBoard();
         //console.log(this.leaderboard.contingents)
         console.log(this.leaderboard);
+        setInterval(() => {
+          // cycle through columns 
+          this.columnSortIdx = (this.columnSortIdx + 1) % this.columns.length
+        }, 2000);
     },
     components: { LeaderboardTableRow},
     computed: {
+
+      leaderboardEntries() {
+        var sortByColumn = this.columns[this.columnSortIdx]
+
+        if (this.cycleColumns) {
+          return _.orderBy(this.leaderboard.rankings, (r) => [r[sortByColumn.name]], [sortByColumn.order])
+        } else {
+          return this.leaderboard.rankings
+        }
+      },
       totalEventCategories() {
         // Compute total number of event categories by
         // summing all combinations of (event, class, gender)
@@ -134,6 +170,7 @@
   }
   .leaderboard {
     font-size: large;
+    width: 100%;
   }
 
   .leaderboard:after {
@@ -144,16 +181,10 @@
 
   }
 
-  /*
-  .divTable {
-    display: table;
-    width: 100%;
-  }
-  */
 
 .divTable {
   float: left;
-  width: 40%;
+  width: 100%;
   margin: 2px;
 }
 
@@ -247,14 +278,14 @@
 	border: 1px solid #999999;
 	display: table-cell;
 	padding: 3px 10px;
-  vertical-align: middle;
+  vertical-align: top;
 }
 
 .divTableHeadContingent {
 	border: 1px solid #999999;
 	display: table-cell;
 	padding: 3px 10px;
-  vertical-align: middle;
+  vertical-align: top;
   text-align: left;
 }
 
@@ -264,7 +295,7 @@
 	padding: 3px 10px;
   color: #000000;
   background-color: #D4AF37;
-  vertical-align: middle;
+  vertical-align: top;
 }
 
 .divTableHeadSilver {
@@ -273,7 +304,7 @@
 	padding: 3px 10px;
   color: #000000;
   background-color: #C0C0C0;
-  vertical-align: middle;
+  vertical-align: top;
 }
 
 .divTableHeadBronze {
@@ -282,7 +313,7 @@
 	padding: 3px 10px;
   color: #000000;
   background-color: #B08D57;
-  vertical-align: middle;
+  vertical-align: top;
 }
 .divTableBody {
 	display: table-row-group;

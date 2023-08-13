@@ -4,9 +4,6 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response, JSONResponse
 
-
-
-from pydantic import BaseModel, ConfigDict, Field
 from slugify import slugify
 from typing import Dict, List, Optional
 #from usssa_leaderboard.config import settings
@@ -98,7 +95,6 @@ async def create_leaderboard(leaderboard:UpdateLeaderboard=Body(...)):
 )
 async def get_leaderboard(slug: str) -> Leaderboard:
     leaderboard = await db["leaderboards"].find_one({"slug": slug})
-
     return leaderboard
 
 @app.post(
@@ -123,6 +119,7 @@ async def create_category_results(slug, category_result: CategoryResult):
     updated_leaderboard = await db.leaderboards.find_one({"slug": slug})
 
     leaderboard = Leaderboard.parse_obj(updated_leaderboard)
+    """
     rankings = [Ranking.dict(r) for r in leaderboard.compute_rankings()]
 
     updated_leaderboard = await db.leaderboards.find_one_and_update(
@@ -130,6 +127,7 @@ async def create_category_results(slug, category_result: CategoryResult):
         {"$set": {"rankings": rankings}}
     )
     updated_leaderboard = await db.leaderboards.find_one({"slug": slug})
+    """
     return updated_leaderboard
 
 
@@ -167,6 +165,7 @@ async def create_contingent_batch(slug, batch:ContingentBatch):
     print("updating rankings")
     # update rankings
     updated_leaderboard = await db.leaderboards.find_one({"slug": slug})
+    """
     leaderboard = Leaderboard.parse_obj(updated_leaderboard)
     rankings = [Ranking.dict(r) for r in leaderboard.compute_rankings()]
     updated_leaderboard = await db.leaderboards.find_one_and_update(
@@ -177,6 +176,7 @@ async def create_contingent_batch(slug, batch:ContingentBatch):
     print("returning")
 
     updated_leaderboard = await db.leaderboards.find_one({"slug": slug})
+    """
     return updated_leaderboard
 
     #return {"message": "success"}

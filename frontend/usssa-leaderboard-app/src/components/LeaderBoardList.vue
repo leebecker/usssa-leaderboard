@@ -1,4 +1,5 @@
 <template>
+
     <div class="leaderboardList">
         <table>
             <thead>
@@ -57,12 +58,16 @@
                 console.log(this.leaderboard)
                 return response.data;
             });
+        },
+        rotateLeaderboardSortKey() {
+            this.columnSortIdx = (this.columnSortIdx + 1) % this.columns.length
         }
     },
     async created() {
         await this.getLeaderBoards();
         //console.log(this.leaderboard.contingents)
         console.log(this.leaderboards);
+
     },
     components: { },
     computed: {
