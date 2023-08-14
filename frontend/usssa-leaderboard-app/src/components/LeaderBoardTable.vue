@@ -1,49 +1,154 @@
 <template>
-    {{ columns[columnSortIdx] }} {{ cycleColumns }}
     <h1>{{ leaderboard.name }} </h1>
 
-    <label for="cycleColumns">Cycle Columns</label>
-    <input type="checkbox" v-model="cycleColumns" name="cycleColumns" />
     <div class="leaderboard">
-      <div class="divTable">
-        <div class="divTableHeadRow">
-          <div class="divTableHead">
-            <span class="fullTitle">Rank 🔢</span>
-            <span class="abbrTitle">🔢</span>
-          </div>
-          <div class="divTableHead">Contingent 👥</div>
-          <div class="divTableHead">
-            <span class="fullTitle">Country 🌎</span>
-            <span class="abbrTitle">🌎</span>
-          </div>
-          <div class="divTableHeadGold">
-            <span class="fullTitle">Gold</span>
-            <span class="abbrTitle">G</span>
-          </div>
-          <div class="divTableHeadSilver">
-            <span class="fullTitle">Silver</span>
-            <span class="abbrTitle">S</span>
-          </div>
-          <div class="divTableHeadBronze">
-            <span class="fullTitle">Bronze</span>
-            <span class="abbrTitle">B</span>
-          </div>
-          <div class="divTableHead">
-            <span class="fullTitle">Medal Count 🏅</span>
-            <span class="abbrTitle">🏅</span>
-          </div>
-          <div class="divTableHead">
-            <span class="fullTitle">Total Points 🏆</span>
-            <span class="abbrTitle">🏆</span>
-          </div>
+      <div id="tableWrapper">
+        <div id="table1">
+          <table>
+            <colgroup>
+              <col v-for="column in columns" :key="column.name" 
+                :class="(column.name == sortByColumn.name) ? 'highlightedColumn' : 'unhighlightedColumn'">
+            </colgroup>
+            <thead id="table1Header">
+              <tr v-if="!isSingleTable" id="table1Header1">
+                <th colspan=8>Top {{leaderboardEntriesTop.length}}</th>
+              </tr>
+              <tr id="table1Header2">
+                <th v-for="column in columns" :key="column.name" :class="column.name" ref="table1Columns">
+                  <div @click="setSortByColumn(column)" :class="{clickSortHeader: isSortableColumn(column.name)}">
+                  <span class="fullTitle" :title="column.text" >{{column.text}}
+                    <span v-if="(column.name == sortByColumn.name) && (column.order === 'desc')">🔻</span>
+                    <span v-else-if="(column.name == sortByColumn.name) && (column.order === 'asc')">🔺</span>
+                  </span>
+                  <span class="abbrTitle" :title="column.text">{{column.abbr}}
+                    <span v-if="(column.name == sortByColumn.name) && (column.order === 'desc')">🔻</span>
+                    <span v-else-if="(column.name == sortByColumn.name) && (column.order === 'asc')">🔺</span>
+                  </span>
+                  </div>
+                </th>
+              </tr>
+            </thead>
+            <tbody id="table1Body">
+              <tr
+              v-for="(entry, index) in leaderboardEntriesTop"
+              :key="index"
+              :class="{even: index % 2 == 1}">
+                <td :class="highlightColumnClass['rank']">{{entry.rank}}</td>
+                <td class="contingent" :title="entry.contingent.name">{{entry.contingent.name}}</td>
+                <td>
+                    <img v-if="entry.isValidCountry" :src="require(`@/assets/flags/84x63/${entry.countryCodeLower}.png`)" :alt="entry.countryCode" class="fullImg">
+                    <span v-else class="fullImg"> -- </span>
+                    <img v-if="entry.isValidCountry" :src="require(`@/assets/flags/84x63/${entry.countryCodeLower}.png`)" :alt="entry.countryCode" class="smallImg">
+                    <span v-else class="smallImg"> -- </span>
+                </td>
+                <td :class="highlightColumnClass['gold']">{{entry.gold}}</td>
+                <td :class="highlightColumnClass['silver']">{{entry.silver}}</td>
+                <td :class="highlightColumnClass['bronze']">{{entry.bronze}}</td>
+                <td :class="highlightColumnClass['medals']">{{entry.medals}}</td>
+                <td :class="highlightColumnClass['points']">{{entry.points}}</td>
+            </tr>
+          </tbody>
+          <tfoot v-if="isSingleTable" id="table1Footer" class="tableFoot">
+            <tr>
+              <td colspan="3" style="background-color: lightslategrey; color: white">
+                Totals {{ leaderboard.category_results.length}} / {{ totalEventCategories }} categories reported:
+              </td>
+              <td>
+                {{ totals.gold}}
+              </td>
+              <td>
+                {{ totals.silver}}
+              </td>
+              <td>
+                {{ totals.bronze}}
+              </td>
+              <td>
+                {{ totals.medals}}
+              </td>
+              <td>
+                {{ totals.points}}
+              </td>
+            </tr>
+          </tfoot>
+          </table>
         </div>
-        <div class="divTableBody">
-            <LeaderboardTableRow v-for="(standing, index) in leaderboardEntries" 
-            :key="standing.contingent_id"
-            :rowIndex="index"
-            :standing="standing"
-            :contingent="leaderboard.idToContingent[standing.contingent_id]" />
+
+        <div v-if="!isSingleTable" id="table2">
+          <table>
+            <colgroup>
+              <col v-for="column in columns" :key="column.name" 
+                :class="(cycleColumns && (column.name == sortByColumn.name)) ? 'highlightedColumn' : 'unhighlightedColumn'">
+            </colgroup>
+            <thead id="table2Header">
+              <tr id="table2Header1">
+                <th colspan=8>Remaining {{leaderboardEntriesBottom.length}}</th>
+              </tr>
+              <tr id="table2Header2">
+                <th v-for="column in columns" :key="column.name" :class="column.name">
+                  <div @click="setSortByColumn(column)" :class="{clickSortHeader: isSortableColumn(column.name)}">
+                    <span class="fullTitle" :title="column.text">{{column.text}} 
+                      <span v-if="(column.name == sortByColumn.name) && (column.order === 'desc')">🔻</span>
+                      <span v-else-if="(column.name == sortByColumn.name) && (column.order === 'asc')">🔺</span>
+                    </span>
+                    <span class="abbrTitle" :title="column.text">{{column.abbr}} 
+                      <span v-if="(column.name == sortByColumn.name) && (column.order === 'desc')">🔻</span>
+                      <span v-else-if="(column.name == sortByColumn.name) && (column.order === 'asc')">🔺</span>
+                    </span>
+                  </div>
+                </th>
+              </tr>
+            </thead>
+            <tbody v-if="!isSingleTable" id="table2Body">
+              <tr
+              v-for="(entry, index) in leaderboardEntriesBottom"
+              :key="index"
+              :class="{even: index % 2 == 1}">
+                <td :class="highlightColumnClass['rank']">{{entry.rank}}</td>
+                <td class="contingent">{{entry.contingent.name}}</td>
+                <td>
+                    <img v-if="entry.isValidCountry" :src="require(`@/assets/flags/84x63/${entry.countryCodeLower}.png`)" :alt="entry.countryCode" class="fullImg">
+                    <span v-else class="fullImg"> -- </span>
+                    <img v-if="entry.isValidCountry" :src="require(`@/assets/flags/84x63/${entry.countryCodeLower}.png`)" :alt="entry.countryCode" class="smallImg">
+                    <span v-else class="smallImg"> -- </span>
+                </td>
+                <td :class="highlightColumnClass['gold']">{{entry.gold}}</td>
+                <td :class="highlightColumnClass['silver']">{{entry.silver}}</td>
+                <td :class="highlightColumnClass['bronze']">{{entry.bronze}}</td>
+                <td :class="highlightColumnClass['medals']">{{entry.medals}}</td>
+                <td :class="highlightColumnClass['points']">{{entry.points}}</td>
+            </tr>
+          </tbody>
+          <tfoot class="tableFoot">
+            <tr>
+              <td colspan="3" style="background-color: lightslategrey; color: white">
+                Totals {{ leaderboard.category_results.length}} / {{ totalEventCategories }} categories reported:
+              </td>
+              <td>
+                {{ totals.gold}}
+              </td>
+              <td>
+                {{ totals.silver}}
+              </td>
+              <td>
+                {{ totals.bronze}}
+              </td>
+              <td>
+                {{ totals.medals}}
+              </td>
+              <td>
+                {{ totals.points}}
+              </td>
+            </tr>
+          </tfoot>
+          </table>
         </div>
+
+
+      </div>
+
+      <div id="controls">
+        <label for="cycleColumns">Auto-cycle sort columns</label>
+        <input type="checkbox" v-model="cycleColumns" name="cycleColumns" />
       </div>
 
         <!-- <div class="divLogo">
@@ -51,15 +156,39 @@
         </div> -->
       </div>
 
-    <div>
-      <h3>Reporting {{ leaderboard.category_results.length}} / {{ totalEventCategories }} categories. </h3>
-    </div>
   </template>
   
   <script>
   import axios from 'axios'
   import _ from 'lodash';
-  import LeaderboardTableRow from './LeaderboardTableRow.vue'
+
+  class LeaderboardEntry {
+    constructor(ranking, leaderboard) {
+      this.contingent = leaderboard.idToContingent[ranking.contingent_id];
+      this.rank = ranking.rank;
+      this.gold = ranking.gold;
+      this.silver = ranking.silver;
+      this.bronze = ranking.bronze;
+      this.medals = ranking.medals;
+      this.points = ranking.points;
+    }
+
+    get ['countryCode']() {
+          return this.contingent.country;
+    }
+
+    get ['countryCodeLower']() {
+          return this.countryCode.toLowerCase();
+    }
+
+    get ['isValidCountry']() {
+          return this.contingent.is_national_federation
+    }
+
+    get ['isEvenRow']() {
+          return this.rowIndex % 2 == 0;
+    }
+  }
 
   export default {
     name: 'LeaderBoardTable',
@@ -67,9 +196,12 @@
         slug: String
     },
     data() {
+        const isSingleTableQuery = window.matchMedia("(max-width: 1024px)")
         return {
             // initialize to an empty list
-            cycleColumns: true,
+            cycleColumns: false,
+            isSingleTableQuery: isSingleTableQuery,
+            isSingleTable: isSingleTableQuery.matches,
             leaderboard: {
               contingents: [],
               standings: [],
@@ -78,22 +210,68 @@
               idToContingent: []
             },
             columns: [
-              {name:'rank', order: 'asc'},
-              {name:'gold', order: 'desc'},
-              {name:'silver', order: 'desc'},
-              {name:'bronze', order: 'desc'},
-              {name:'medals', order: 'desc'},
-              {name:'points', order: 'desc'},
+              {
+                name:'rank', 
+                text:'Rank 🔢',
+                abbr:'🔢',
+                order: 'asc'
+              },
+              {
+                name:'contingent',
+                text:'Contingent 👥',
+                abbr:'Team 👥',
+              },
+              {
+                name:'country', 
+                text:'Country 🌎',
+                abbr:'🌎',
+              },
+              {
+                name:'gold', 
+                text:'Gold',
+                abbr:'G',
+                order: 'desc'
+              },
+              {
+                name: 'silver', 
+                text: 'Silver',
+                abbr: 'S',
+                order: 'desc'
+              },
+              {
+                name:'bronze', 
+                text:'Bronze',
+                abbr:'B',
+                order: 'desc'
+              },
+              {
+                name: 'medals', 
+                text: 'Medals 🏅',
+                abbr: '🏅',
+                order: 'desc'
+              },
+              {
+                name:'points',
+                text: 'Points 🏆',
+                abbr: '🏆',
+                order: 'desc'
+              }
             ],
-            columnSortIdx: 0
+            columnSortIdx: 0,
+            highlightColumnClass: {
+              "rank": "unhighlightedColumn",
+              "gold": "unhighlightedColumn",
+              "silver": "unhighlightedColumn",
+              "bronze": "unhighlightedColumn",
+              "medals": "unhighlightedColumn",
+              "points": "highlightedColumn",
+            }
         };
     },
     methods: {
         async getLeaderBoard() {
             var service_url = process.env.VUE_APP_LEADERBOARD_API_URL;
-            console.log("TACOS AYAYAYA")
-            console.log(service_url)
-            console.log(`${service_url}/leaderboards/${this.slug}`)
+            // console.log(`${service_url}/leaderboards/${this.slug}`)
             await axios.get(`${service_url}/leaderboards/${this.slug}`).then(response => {
                 this.leaderboard = response.data;
                 if (this.leaderboard.categories == null) {
@@ -111,27 +289,126 @@
                 console.log(this.leaderboard)
                 return response.data;
             });
-        }
+        },
+        getContingent(entry_id) {
+            if (entry_id in this.leaderboard.idToContingent) {
+              return this.leaderboard.idToContingent[entry_id]
+            } else {
+              // FIXME return empty contingent?
+              return {
+
+              }
+            }
+        },
+        updateSortColumn() {
+          if (this.cycleColumns) {
+            this.columnSortIdx = (this.columnSortIdx + 1) % this.sortableColumns.length
+
+            this.sortableColumns.forEach((c) => {
+              if (this.sortByColumn.name == c.name) {
+                this.highlightColumnClass[c.name] = "highlightedColumn"
+              } else {
+                this.highlightColumnClass[c.name] = "unhighlightedColumn"
+              }
+            })
+          }
+        },
+        isSortableColumn(name) {
+          return this.sortableColumns.filter((c) => c.name == name).length > 0
+        },
+        setSortByColumn(column) {
+          // Determine which of the sortable columns was clicked
+          var newColumnIdx = this.sortableColumns.findIndex(element => element.name === column.name)
+          if (newColumnIdx > -1) {
+            // click matched column, disable auto-cycle columns
+            this.cycleColumns = false
+            if (newColumnIdx != this.columnSortIdx) {
+              // found update column index
+              this.columnSortIdx = newColumnIdx;
+            } 
+
+            this.sortableColumns.forEach((c) => {
+              if (this.sortByColumn.name == c.name) {
+                this.highlightColumnClass[c.name] = "highlightedColumn"
+              } else {
+                this.highlightColumnClass[c.name] = "unhighlightedColumn"
+              }
+
+            })
+
+            // FIXME: not flipping ordering because it messes with the meaning of the table headers
+            // Flip order
+            // this.sortableColumns[this.columnSortIdx].order = (this.sortByColumn.order === "asc") ? "desc" : "asc"
+          }
+        },
     },
     async created() {
         await this.getLeaderBoard();
-        //console.log(this.leaderboard.contingents)
-        console.log(this.leaderboard);
+
+        // Retrieve leaderboard every 10 minutes
+        setInterval(async () => {
+          await this.getLeaderBoard();
+        }, 10*60*1000)
+
+
         setInterval(() => {
-          // cycle through columns 
-          this.columnSortIdx = (this.columnSortIdx + 1) % this.columns.length
-        }, 2000);
+          // switch sort column every 10 seconds
+          this.updateSortColumn();
+        }, 1*1000);
     },
-    components: { LeaderboardTableRow},
+    components: { },
     computed: {
+      sortByColumn() {
+        return this.sortableColumns[this.columnSortIdx];
+      },
+      sortableColumns() {
+        return this.columns.filter((c) => c.order)
+      },
+      totals() {
+        var totalEntry = new LeaderboardEntry(
+          {
+            contingent_id: "totals",
+            rank: 0,
+            gold: 0,
+            silver: 0,
+            bronze: 0,
+            medals: 0,
+            points: 0,
+          }, 
+          this.leaderboard
+        );
 
+        this.leaderboardEntries.forEach((entry) => {
+          this.sortableColumns.forEach((col) => {
+            totalEntry[col.name] += entry[col.name];
+          })
+        })
+
+        return totalEntry;
+
+      },
       leaderboardEntries() {
-        var sortByColumn = this.columns[this.columnSortIdx]
+        var entries = []
+        if (this.leaderboard.rankings) {
+          entries = this.leaderboard.rankings.map((r) => new LeaderboardEntry(r, this.leaderboard));
+        }
 
-        if (this.cycleColumns) {
-          return _.orderBy(this.leaderboard.rankings, (r) => [r[sortByColumn.name]], [sortByColumn.order])
+        return _.orderBy(entries, (e) => e[this.sortByColumn.name], [this.sortByColumn.order])
+      },
+      leaderboardEntriesTop() {
+        if (this.isSingleTable) {
+          return this.leaderboardEntries
         } else {
-          return this.leaderboard.rankings
+          var endIdx = Math.round(this.leaderboardEntries.length / 2)
+          return this.leaderboardEntries.slice(0, endIdx)
+        }
+      },
+      leaderboardEntriesBottom() {
+        if (this.isSingleTable) {
+          return []
+        } else {
+          var endIdx = Math.round(this.leaderboardEntries.length / 2) - this.leaderboardEntries.length;
+          return this.leaderboardEntries.slice(endIdx)
         }
       },
       totalEventCategories() {
@@ -148,6 +425,12 @@
         return totalEvents;
       }
 
+    },
+    mounted() {
+        // watch for mobile event value
+        this.isSingleTableQuery.addEventListener('change', () => {
+          this.isSingleTable = this.isSingleTableQuery.matches
+        })
     }
 }
   </script>
@@ -168,26 +451,14 @@
   a {
     color: #42b983;
   }
-  .leaderboard {
-    font-size: large;
-    width: 100%;
-  }
-
-  .leaderboard:after {
-    /*display: flex;
-    flex-wrap: wrap;*/
-    display: table;
-    clear: both;
-
-  }
 
 
-.divTable {
-  float: left;
-  width: 100%;
-  margin: 2px;
+
+
+
+.leaderboard {
+  font-size: x-large;
 }
-
 .divLogo {
   float: left;
 }
@@ -198,54 +469,262 @@
 .abbrTitle {
   display: none;
 }
-/*
-.divTableLeft{
-	display: table;
-	width: 45%;
-  margin: 5px;
-}
-.divTableRight{
-	display: table;
-	width: 50%;
-  margin: 5px;
-}
-*/
 
-@media screen and (max-width: 700px) {
+
+table {
+  border-collapse: collapse;
+  border-radius: 5px;
+}
+
+td {
+
+}
+
+
+thead {
+	font-weight: bold;
+  color: #FFFFFF;
+  background-color: #00007F;
+  min-width: 400px;
+  /* min-height: 80px;
+  max-height: 100px; */
+}
+
+#table1, #table2 {
+  flex: 1;
+  width: 100%;
+  justify-content: center;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0px;
+  vertical-align: top;
+}
+
+#table1 {
+}
+
+#table2 {
+}
+
+#table1Header1 {
+	background-color: darkblue;
+  height: 20px;
+}
+
+#table2Header1 {
+  background-color: #a40000;
+  height: 20px;
+}
+
+#table1Header2 {
+	background-color: steelblue;
+  height: 50px;
+  /* border-bottom: 2px solid #383838; */
+} 
+
+#table2Header2 {
+	background-color: #cd5c5c;
+  height: 50px;
+  /* border-bottom: 2px solid #383838; */
+
+}
+
+tfoot {
+  background-color: lightslategray;
+  color: white;
+  border-top: 2px solid #383838;
+}
+
+tbody {
+  background-color: #E0E0E0;
+  min-width: 400px;
+}
+
+tbody tr {
+  height: 100px;
+  min-height: 100px;
+  max-height: 100px;
+  vertical-align: middle;
+  border-right: 1px solid white;
+  /* border-left: 1px solid #383838; */
+}
+
+div.clickSortHeader {
+  cursor: pointer;
+}
+
+tr.even {
+  background-color: white;
+}
+
+th {
+  padding-left:15px;
+  padding-right:15px;
+  padding-bottom: 0px;
+  vertical-align: middle;
+}
+
+#table1Header1 th:first-of-type {
+  border-top-left-radius: 15px;
+}
+
+#table1Header1 thead:first-of-type {
+  border-top-left-radius: 15px solid #383838;
+
+}
+
+#table2Header1 th:first-of-type {
+  border-top-right-radius: 15px;
+}
+
+
+
+
+th.gold {
+  background-color: #D4AF37;
+}
+
+th.silver {
+  background-color: #C0C0C0;
+}
+
+th.bronze {
+  background-color: #B08D57;
+}
+
+td {
+  vertical-align: middle;
+}
+
+td.contingent {
+  min-width: 50px;
+  max-width: 200px;
+  margin-top: 15%;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+          line-clamp: 2;
+  -webkit-box-orient: vertical;
+  /* text-overflow:ellipsis;  only needed if not using webkit*/
+  overflow: scroll;
+}
+
+.leaderboard {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin: auto;
+}
+
+#tableWrapper {
+  display: flex;
+  justify-content: center;
+  flex-direction: row;
+  margin: auto;
+}
+
+.unhighlightedColumn {
+
+}
+
+.highlightedColumn {
+  background-color: #b0c4de7f;
+}
+
+.fullImg {
+    display: inline;
+      transform: scale(0.5, 0.5);
+}
+.smallImg {
+    display: none;
+      transform: scale(0.25, 0.25);
+
+}
+
+/* Adjust for different screen sizes */
+@media screen and (max-width: 1920px) {
     .leaderboard {
-      font-size: small;
+      font-size: medium;
     }
 
-  .fullTitle {
-    display: none;
-  }
-  .abbrTitle {
-    display: inline;
-  }
-  .divLogo {
-    /*transform: scale(0.5, 0.5);
-    flex-wrap: wrap;*/
-    display: none;
+    #tableWrapper {
+      justify-content: center;
+      flex-direction: row;
+      margin: auto;
+    }
 
+    .fullTitle {
+      display: inline;
+    }
+    .abbrTitle {
+      display: none;
   }
 }
 
 @media screen and (max-width: 1440px) {
     .leaderboard {
+      font-size: medium;
+    }
+
+    #tableWrapper {
+      justify-content: center;
+      flex-direction: row;
+      margin: auto;
+    }
+
+    .fullTitle {
+      display: none;
+    }
+    .abbrTitle {
+      display: inline;
+  }
+}
+
+
+@media screen and (max-width: 1024px) {
+    .leaderboard {
+      font-size: medium;
+    }
+
+    #tableWrapper {
+      justify-content: center;
+      flex-direction: column;
+      margin: auto;
+    }
+
+    tbody tr {
+      height: 40px;
+      min-height: 40px;
+      max-height: 100px;
+      vertical-align: middle;
+      border-right: 1px solid white;
+      /* border-left: 1px solid #383838; */
+    }
+
+    td.contingent {
+      min-width: 50px;
+      max-width: 150px;
+      height: 20px;
+      vertical-align: top;
+      /* display: -webkit-box;
+      -webkit-line-clamp: 2;
+              line-clamp: 2;
+      -webkit-box-orient: vertical; */
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+
+    .fullTitle {
+      display: none;
+    }
+    .abbrTitle {
+      display: inline;
+  }
+}
+
+/* @media screen and (max-width: 1440px) {
+    .leaderboard {
       font-size: small;
-    }
-    .divTable {
-      width: 100%;
-    }
-    .divLogo {
-      width: 100%;
-    }
-    
-    #secondHeader, #secondGold, #secondSilver, #secondBronze{
-      opacity: 0.0;
-      color: #FFFFFF;
-      background-color: #FFFFFF;
-      height: 5px;
     }
 }
 
@@ -253,70 +732,7 @@
     .leaderboard {
       font-size: medium;
     }
-    /*
-    .divTable {
-      width: 100%;
-    }
-    */
-    
-    #secondHeader, #secondGold, #secondSilver, #secondBronze{
-      opacity: 0.0;
-      color: #FFFFFF;
-      background-color: #FFFFFF;
-      height: 5px;
-    }
-}
+} */
 
-.divTableHeadRow {
-	background-color: #00007F;
-	display: table-header-group;
-	font-weight: bold;
-  color: #FFFFFF;
-}
-
-.divTableHead {
-	border: 1px solid #999999;
-	display: table-cell;
-	padding: 3px 10px;
-  vertical-align: top;
-}
-
-.divTableHeadContingent {
-	border: 1px solid #999999;
-	display: table-cell;
-	padding: 3px 10px;
-  vertical-align: top;
-  text-align: left;
-}
-
-.divTableHeadGold {
-	border: 1px solid #999999;
-	display: table-cell;
-	padding: 3px 10px;
-  color: #000000;
-  background-color: #D4AF37;
-  vertical-align: top;
-}
-
-.divTableHeadSilver {
-	border: 1px solid #999999;
-	display: table-cell;
-	padding: 3px 10px;
-  color: #000000;
-  background-color: #C0C0C0;
-  vertical-align: top;
-}
-
-.divTableHeadBronze {
-	border: 1px solid #999999;
-	display: table-cell;
-	padding: 3px 10px;
-  color: #000000;
-  background-color: #B08D57;
-  vertical-align: top;
-}
-.divTableBody {
-	display: table-row-group;
-}
   </style>
   

@@ -37,7 +37,6 @@
 
 <script>
   import axios from 'axios'
-  //import LeaderboardTableRow from './LeaderboardTableRow.vue'
 
   export default {
     name: 'LeaderBoardList',

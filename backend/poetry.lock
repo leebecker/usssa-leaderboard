@@ -207,6 +207,20 @@ dotenv = ["python-dotenv (>=0.10.4)"]
 email = ["email-validator (>=1.0.3)"]
 
 [[package]]
+name = "pydantic-computed"
+version = "0.2.2"
+description = "A new decorator for pydantic allowing you to define dynamic fields that are computed from other properties"
+optional = false
+python-versions = ">=3.7,<4.0"
+files = [
+    {file = "pydantic_computed-0.2.2-py3-none-any.whl", hash = "sha256:4f6982a8f3a5220e558af6c7971ac00e5e2c75e9d41da0d145d316f08e9882e1"},
+    {file = "pydantic_computed-0.2.2.tar.gz", hash = "sha256:b48b00952137ea2fe1919ccb08c7e0795d9658f1ff77d289d140e86157d5fca1"},
+]
+
+[package.dependencies]
+pydantic = ">=1.10.2,<2.0.0"
+
+[[package]]
 name = "pymongo"
 version = "4.4.1"
 description = "Python driver for MongoDB <http://www.mongodb.org>"
@@ -390,4 +404,4 @@ standard = ["colorama (>=0.4)", "httptools (>=0.5.0)", "python-dotenv (>=0.13)",
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8,<4.0"
-content-hash = "a4f3c5053c871c2a1e0ae86bc3068282c58b8edfa7d6af944a478d030966b75f"
+content-hash = "5448dc841904ebc971e3ad68e44357135f66b182f81d22a46d164be8e9ab7b55"

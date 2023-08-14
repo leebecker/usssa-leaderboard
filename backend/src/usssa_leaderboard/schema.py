@@ -127,8 +127,8 @@ class Leaderboard(BaseModel):
                 totals[contingent_id].medals += 1
                 totals[contingent_id].points += award_values.silver
 
-            for contingent_id in result.silver_contingent_id:
-                totals[contingent_id].silver += 1
+            for contingent_id in result.bronze_contingent_id:
+                totals[contingent_id].bronze += 1
                 totals[contingent_id].medals += 1
                 totals[contingent_id].points += award_values.silver
 
