@@ -1,7 +1,7 @@
 <template>
   <nav>
     <router-link to="/">Home</router-link> |
-    <router-link to="/admin">Admin</router-link>
+    <router-link v-if="showAdmin" :to="adminPath">Admin</router-link>
   </nav>
   <router-view/>
 </template>
@@ -27,4 +27,22 @@ nav a {
 nav a.router-link-exact-active {
   color: #42b983;
 }
+
 </style>
+
+<script>
+
+export default {
+  data() {
+    // modify .env.development.local or .env to update this value
+    var showAdmin = JSON.parse(process.env.VUE_APP_LEADERBOARD_SHOW_ADMIN_ACCESS);
+    var adminObfuscationSuffix = process.env.VUE_APP_LEADERBOARD_ADMIN_OBFUSCATION_SUFFIX;
+    return {
+      showAdmin: showAdmin,
+      adminObfuscationSuffix: adminObfuscationSuffix,
+      adminPath: `/admin-${adminObfuscationSuffix}`
+    }
+  }
+
+}
+</script>

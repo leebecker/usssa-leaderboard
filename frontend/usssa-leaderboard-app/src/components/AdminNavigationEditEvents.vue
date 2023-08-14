@@ -63,7 +63,6 @@ export default {
               this.leaderboard.idToContingent = Object.fromEntries(
                 this.leaderboard.contingents.map(c => [c.id, c])
               );
-              console.log(this.leaderboard)
               if (this.leaderboard.category_results == null) {
                 this.leaderboard.category_results = []
               }

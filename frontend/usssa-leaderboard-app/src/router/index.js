@@ -1,5 +1,7 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 
+var adminObfuscationSuffix = process.env.VUE_APP_LEADERBOARD_ADMIN_OBFUSCATION_SUFFIX;
+
 const routes = [
   {
     path: '/',
@@ -12,7 +14,7 @@ const routes = [
     component: () => import('../views/LeaderBoardView.vue')
   },
   {
-    path: '/admin',
+    path: `/admin-${adminObfuscationSuffix}`,
     name: 'admin',
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route
@@ -20,7 +22,7 @@ const routes = [
     component: () => import('../views/AdminRootView.vue')
   },
   {
-    path: '/admin/:slug',
+    path: `/admin-${adminObfuscationSuffix}/:slug`,
     name: 'adminEvent',
     // route level code-splitting
     // this generates a separate chunk (about.[hash].js) for this route
