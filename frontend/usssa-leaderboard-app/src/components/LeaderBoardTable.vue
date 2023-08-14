@@ -354,7 +354,7 @@
         setInterval(() => {
           // switch sort column every 10 seconds
           this.updateSortColumn();
-        }, 1*1000);
+        }, 10*1000);
     },
     components: { },
     computed: {
