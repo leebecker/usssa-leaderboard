@@ -48,7 +48,6 @@ async def startup():
 async def find_leaderboards():
 
     collection = db["leaderboards"]
-    print(collection)
     leaderboards = []
     async for leaderboard in collection.find():
         leaderboards.append(leaderboards)
@@ -62,7 +61,6 @@ async def find_leaderboards():
 )
 async def get_leaderboards() -> LeaderboardList:
     collection = db["leaderboards"]
-    print(collection)
     leaderboards = []
     for leaderboard in await collection.find().to_list(length=100):
         leaderboards.append(leaderboard)
@@ -94,7 +92,8 @@ async def create_leaderboard(leaderboard:UpdateLeaderboard=Body(...)):
     status_code=status.HTTP_200_OK
 )
 async def get_leaderboard(slug: str) -> Leaderboard:
-    leaderboard = await db["leaderboards"].find_one({"slug": slug})
+    leaderboard_obj = await db["leaderboards"].find_one({"slug": slug})
+    leaderboard= Leaderboard.parse_obj(leaderboard_obj)
     return leaderboard
 
 @app.post(
@@ -119,16 +118,8 @@ async def create_category_results(slug, category_result: CategoryResult):
     updated_leaderboard = await db.leaderboards.find_one({"slug": slug})
 
     leaderboard = Leaderboard.parse_obj(updated_leaderboard)
-    """
-    rankings = [Ranking.dict(r) for r in leaderboard.compute_rankings()]
 
-    updated_leaderboard = await db.leaderboards.find_one_and_update(
-        {"slug": slug},
-        {"$set": {"rankings": rankings}}
-    )
-    updated_leaderboard = await db.leaderboards.find_one({"slug": slug})
-    """
-    return updated_leaderboard
+    return leaderboard
 
 
 
@@ -143,11 +134,12 @@ async def create_contingent(slug, contingent:Contingent):
 )
 async def create_contingent_batch(slug, batch:ContingentBatch):
     leaderboard = await db.leaderboards.find_one({"slug": slug})
+    print(leaderboard)
     leaderboard = Leaderboard.parse_obj(leaderboard)
+    print(leaderboard)
 
     batch_values = []
     for contingent in batch.contingents:
-        print(contingent)
         if leaderboard.is_existing_contingent(contingent):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -156,30 +148,21 @@ async def create_contingent_batch(slug, batch:ContingentBatch):
         else:
             batch_values.append(contingent.dict())
 
-    print(batch_values)
     original_leaderboard = await db.leaderboards.find_one_and_update(
         {"slug": slug},
         {"$push": {"contingents": {"$each": batch_values }}}
     )
+    if not original_leaderboard:
+        raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={"message": f"Unable to update"}
+        )
 
-    print("updating rankings")
     # update rankings
     updated_leaderboard = await db.leaderboards.find_one({"slug": slug})
-    """
-    leaderboard = Leaderboard.parse_obj(updated_leaderboard)
-    rankings = [Ranking.dict(r) for r in leaderboard.compute_rankings()]
-    updated_leaderboard = await db.leaderboards.find_one_and_update(
-        {"slug": slug},
-        {"$set": {"rankings": rankings}}
-    )
-
-    print("returning")
-
-    updated_leaderboard = await db.leaderboards.find_one({"slug": slug})
-    """
+    updated_leaderboard = Leaderboard.parse_obj(updated_leaderboard)
     return updated_leaderboard
 
-    #return {"message": "success"}
 
 
 #@app.patch("/leaderboard/{slug}/rankings")

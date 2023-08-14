@@ -1,5 +1,5 @@
 <template>
-    <h1>{{ leaderboard.name }} </h1>
+    <h1>{{ leaderboard.description }} </h1>
 
     <div class="leaderboard">
       <div id="tableWrapper">
@@ -270,9 +270,8 @@
     },
     methods: {
         async getLeaderBoard() {
-            var service_url = process.env.VUE_APP_LEADERBOARD_API_URL;
-            // console.log(`${service_url}/leaderboards/${this.slug}`)
-            await axios.get(`${service_url}/leaderboards/${this.slug}`).then(response => {
+            var api_url = process.env.VUE_APP_LEADERBOARD_API_URL;
+            await axios.get(`${api_url}/leaderboards/${this.slug}`).then(response => {
                 this.leaderboard = response.data;
                 if (this.leaderboard.categories == null) {
                   this.leaderboard.categories = []

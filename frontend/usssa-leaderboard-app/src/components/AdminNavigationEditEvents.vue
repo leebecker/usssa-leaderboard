@@ -55,7 +55,10 @@ export default {
   },
   methods: {
       async getLeaderBoard() {
-          await axios.get(`http://127.0.0.1:8000/leaderboards/${this.slug}`).then(response => {
+
+          var api_url = process.env.VUE_APP_LEADERBOARD_API_URL;
+
+          await axios.get(`${api_url}/leaderboards/${this.slug}`).then(response => {
               this.leaderboard = response.data;
               this.leaderboard.idToContingent = Object.fromEntries(
                 this.leaderboard.contingents.map(c => [c.id, c])

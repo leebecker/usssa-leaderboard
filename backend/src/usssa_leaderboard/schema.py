@@ -101,7 +101,7 @@ class Leaderboard(BaseModel):
     slug: str
     description: Optional[str] = ""
     award_values: AwardValues
-    categories: List[CategoryDefinition]
+    categories: Optional[List[CategoryDefinition]] = Field(default_factory=list)
     contingents: Optional[List[Contingent]] = Field(default_factory=list)
     category_results: List[CategoryResult] = Field(default_factory=list)
 
@@ -113,7 +113,7 @@ class Leaderboard(BaseModel):
         award_values: AwardValues,
         **kwargs
     ) -> List[Ranking]:
-        
+
         totals = {c.id: Ranking(contingent_id=c.id) for c in contingents}
 
         for result in category_results:
@@ -146,6 +146,7 @@ class Leaderboard(BaseModel):
                 rank_idx += 1
                 last_points = r.points
             r.rank = rank_idx
+
         return rankings
 
 
