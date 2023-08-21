@@ -1,8 +1,12 @@
 
 <script>
 
-import axios from 'axios'
 import AdminFormCreateEventCategory from './AdminFormCreateEventCategory.vue'
+import { useLeaderboardsStore } from '@/stores/leaderboards.store'
+
+
+const leaderboardsStore  = useLeaderboardsStore();
+  console.log(leaderboardsStore)
 
 export default {
   name: 'AdminFormCreateEvent',
@@ -46,15 +50,17 @@ export default {
       field.options.push('')
     },
     submit() {
-      var eventData = {
-        name: this.name,
-        description: this.description,
-        award_values: this.award_values,
-        categories: this.categories,
-        contingents: []
-      };
-      console.log(eventData)
-      this.postEvent(eventData);
+      // var eventData = {
+      //   name: this.name,
+      //   description: this.description,
+      //   award_values: this.award_values,
+      //   categories: this.categories,
+      //   contingents: []
+      // };
+      //console.log(eventData)
+
+      console.log(leaderboardsStore)
+      leaderboardsStore.create(this.name, this.description, this.award_values, this.categories)
     },
     clear() {
       this.name = ''
@@ -65,17 +71,7 @@ export default {
         bronze: 40
       },
       this.categories = [this.createCategory()]
-    },
-    async postEvent(eventData) {
-            var api_url = process.env.VUE_APP_LEADERBOARD_API_URL
-            await axios.post(`${api_url}/leaderboards`, eventData).then(response => {
-                console.log(response.data);
-                // TODO event bus the leaderboard
-                // this.category_results = response.data.category_results
-                return response.data;
-            });
     }
-
   },
   components: {
     AdminFormCreateEventCategory

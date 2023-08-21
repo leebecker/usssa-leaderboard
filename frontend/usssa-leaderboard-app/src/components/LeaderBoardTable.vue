@@ -159,8 +159,10 @@
   </template>
   
   <script>
-  import axios from 'axios'
   import _ from 'lodash';
+  import { useLeaderboardsStore } from '@/stores'
+
+  const leaderboardsStore = useLeaderboardsStore()
 
   class LeaderboardEntry {
     constructor(ranking, leaderboard) {
@@ -270,24 +272,7 @@
     },
     methods: {
         async getLeaderBoard() {
-            var api_url = process.env.VUE_APP_LEADERBOARD_API_URL;
-            await axios.get(`${api_url}/leaderboards/${this.slug}`).then(response => {
-                this.leaderboard = response.data;
-                if (this.leaderboard.categories == null) {
-                  this.leaderboard.categories = []
-                }
-                if (this.leaderboard.category_results == null) {
-                  this.leaderboard.category_results = []
-                }
-                if (this.leaderboard.contingents == null) {
-                  this.leaderboard.contingents = []
-                }
-                this.leaderboard.idToContingent = Object.fromEntries(
-                  this.leaderboard.contingents.map(c => [c.id, c])
-                );
-                console.log(this.leaderboard)
-                return response.data;
-            });
+            this.leaderboard = await leaderboardsStore.getLeaderboard(this.slug)
         },
         getContingent(entry_id) {
             if (entry_id in this.leaderboard.idToContingent) {

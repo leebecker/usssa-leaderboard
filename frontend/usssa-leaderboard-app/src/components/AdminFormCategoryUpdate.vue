@@ -92,7 +92,9 @@
 </template>
 
 <script>
-import axios from 'axios'
+import { useLeaderboardsStore } from '@/stores'
+
+const leaderboardsStore  = useLeaderboardsStore();
 
 export default {
     name: "AdminFormCategoryUpdate",
@@ -190,23 +192,13 @@ export default {
 
             console.log("payload")
             console.log(resultsData)
-            this.postResults(resultsData)
+            leaderboardsStore.addCategoryResults(this.slug, resultsData)
         },
         categoryResultToKey(categoryResult) {
             return [categoryResult.category.name]
                 .concat(categoryResult.category.fields)
                 .join('-')
         },
-        async postResults(resultsData) {
-            var api_url = process.env.VUE_APP_LEADERBOARD_API_URL
-            await axios.post(`${api_url}/leaderboards/${this.slug}/category_results`, resultsData).then(response => {
-                console.log(response.data);
-                // TODO event bus the leaderboard
-                //this.category_results = response.data.category_results
-                return response.data;
-            });
-        }
-
   }
 }
 </script>

@@ -71,8 +71,10 @@
 </template>
 
 <script>
-import axios from 'axios'
-import countries from '../assets/country_names.json'
+import countries from '@/assets/country_names.json'
+import { useLeaderboardsStore } from '@/stores/leaderboards.store'
+
+const leaderboardsStore  = useLeaderboardsStore();
 
 export default {
     name: "AdminFormContingentUpdate",
@@ -125,20 +127,9 @@ export default {
                 contingents: this.inputContingents
             }
 
-            console.log("payload")
-            console.log(contingentsData)
-            this.postContingents(contingentsData)
+            leaderboardsStore.addContingents(this.slug, contingentsData)
             this.inputContingents = [Object.assign({}, this.emptyContingent)]
         },
-        async postContingents(resultsData) {
-            await axios.post(`http://127.0.0.1:8000/leaderboards/${this.slug}/contingents/batch`, resultsData).then(response => {
-                console.log(response.data);
-                // TODO event bus the leaderboard
-                // this.category_results = response.data.category_results
-                return response.data;
-            });
-        }
-
   }
 }
 </script>

@@ -29,11 +29,12 @@
 </template>
 
 <script>
-import axios from 'axios'
 import AdminFormCategoryUpdate from './AdminFormCategoryUpdate.vue';
 import AdminFormContingentUpdate from './AdminFormContingentUpdate.vue';
 import { AccordionList, AccordionItem } from  "vue3-rich-accordion";
+import { useLeaderboardsStore} from "@/stores"
 
+const leaderboardStore = useLeaderboardsStore()
 
 export default {
   name: 'AdminNavigationEditEvents',
@@ -55,22 +56,10 @@ export default {
   },
   methods: {
       async getLeaderBoard() {
-
-          var api_url = process.env.VUE_APP_LEADERBOARD_API_URL;
-
-          await axios.get(`${api_url}/leaderboards/${this.slug}`).then(response => {
-              this.leaderboard = response.data;
-              this.leaderboard.idToContingent = Object.fromEntries(
-                this.leaderboard.contingents.map(c => [c.id, c])
-              );
-              if (this.leaderboard.category_results == null) {
-                this.leaderboard.category_results = []
-              }
-              if (this.leaderboard.contingents == null) {
-                this.leaderboard.contingents = []
-              }
-              return response.data;
-          });
+          console.log("LEEEDAH1")
+          this.leaderboard = await leaderboardStore.getLeaderBoard(this.slug)
+          console.log("LEEEDAH2")
+          console.log(this.leaderboard)
       }
   },
   async created() {
