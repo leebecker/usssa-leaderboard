@@ -1,13 +1,16 @@
+from datetime import timedelta
 from bson import ObjectId
-from fastapi import FastAPI, Body, HTTPException, status
+from fastapi import Depends, FastAPI, Body, HTTPException, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response, JSONResponse
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 from slugify import slugify
-from typing import Dict, List, Optional
-#from usssa_leaderboard.config import settings
+from typing import Annotated, Dict, List, Optional
+from usssa_leaderboard.config import settings
 
+from . import auth
 from .db import db, PyObjectId
 from .schema import (
     CategoryResult,
@@ -25,10 +28,16 @@ pydantic.json.ENCODERS_BY_TYPE[ObjectId]=str
 
 app = FastAPI()
 
+
+
+
+
 origins = [
     "http://localhost",
     "http://localhost:8080",
-    "http://127.0.0.1:8080"
+    "http://127.0.0.1:8080",
+    "http://localhost:8081",
+    "http://127.0.0.1:8081"
 ]
 
 app.add_middleware(
@@ -44,6 +53,26 @@ app.add_middleware(
 async def startup():
     await db.leaderboards.create_index("slug", unique=True)
     await db.category_results.create_index("slug", unique=True)
+
+
+@app.post("/token", response_model=auth.Token)
+async def login_for_access_token(
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
+):
+    user = auth.authenticate_user(auth.fake_users_db, form_data.username, form_data.password)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    access_token_expires = timedelta(minutes=auth.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = auth.create_access_token(
+        data={"sub": user.username}, expires_delta=access_token_expires
+    )
+    return {"access_token": access_token, "token_type": "bearer"}
+
+
 
 async def find_leaderboards():
 
@@ -73,7 +102,10 @@ async def get_leaderboards() -> LeaderboardList:
     "/leaderboards",
     response_model=Leaderboard,
     status_code=status.HTTP_201_CREATED)
-async def create_leaderboard(leaderboard:UpdateLeaderboard=Body(...)):
+async def create_leaderboard(
+    token: Annotated[str, Depends(auth.get_current_active_user)],
+    leaderboard:UpdateLeaderboard=Body(...)
+):
     leaderboard = jsonable_encoder(leaderboard)
     # compute and add slug
     leaderboard['slug'] = slugify(leaderboard['name'])
@@ -101,7 +133,11 @@ async def get_leaderboard(slug: str) -> Leaderboard:
     response_model=Leaderboard,
     status_code=status.HTTP_201_CREATED
 )
-async def create_category_results(slug, category_result: CategoryResult):
+async def create_category_results(
+    token: Annotated[str, Depends(auth.get_current_active_user)],
+    slug: str, 
+    category_result: CategoryResult
+):
     leaderboard = await db.leaderboards.find_one({"slug": slug})
     leaderboard = Leaderboard.parse_obj(leaderboard)
     if leaderboard.is_existing_category_result(category_result):
@@ -124,7 +160,11 @@ async def create_category_results(slug, category_result: CategoryResult):
 
 
 @app.post("/leaderboards/{slug}/contingents")
-async def create_contingent(slug, contingent:Contingent):
+async def create_contingent(
+    token: Annotated[str, Depends(auth.get_current_active_user)],
+    slug: str,
+    contingent:Contingent
+):
     return {"message": "success"}
 
 @app.post(
@@ -132,7 +172,11 @@ async def create_contingent(slug, contingent:Contingent):
     response_model=Leaderboard,
     status_code=status.HTTP_201_CREATED
 )
-async def create_contingent_batch(slug, batch:ContingentBatch):
+async def create_contingent_batch(
+    token: Annotated[str, Depends(auth.get_current_active_user)],
+    slug: str,
+    batch:ContingentBatch
+):
     leaderboard = await db.leaderboards.find_one({"slug": slug})
     print(leaderboard)
     leaderboard = Leaderboard.parse_obj(leaderboard)
