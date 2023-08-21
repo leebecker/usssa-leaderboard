@@ -56,9 +56,7 @@ export default {
   },
   methods: {
       async getLeaderBoard() {
-          console.log("LEEEDAH1")
-          this.leaderboard = await leaderboardStore.getLeaderBoard(this.slug)
-          console.log("LEEEDAH2")
+          this.leaderboard = await leaderboardStore.getLeaderboard(this.slug)
           console.log(this.leaderboard)
       }
   },
