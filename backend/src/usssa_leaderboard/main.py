@@ -52,14 +52,15 @@ app.add_middleware(
 @app.on_event("startup")
 async def startup():
     await db.leaderboards.create_index("slug", unique=True)
-    await db.category_results.create_index("slug", unique=True)
+    #await db.users.create_index("username")
+    #await db.category_results.create_index("slug", unique=True)
 
 
 @app.post("/token", response_model=auth.Token)
 async def login_for_access_token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
 ):
-    user = auth.authenticate_user(auth.fake_users_db, form_data.username, form_data.password)
+    user = await auth.authenticate_user(form_data.username, form_data.password)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
